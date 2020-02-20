@@ -6,7 +6,6 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour
 {
     public float speed;
-    //public float jumpForce;
     public float jumpSpeed;
     public float attackSpeed;
     public Material[] _material;
@@ -25,6 +24,8 @@ public class PlayerController : MonoBehaviour
     private Slider attackGage;
     private float gage;
 
+    private GameObject playerPos;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -34,6 +35,7 @@ public class PlayerController : MonoBehaviour
 
         attackGage = GameObject.Find("AttackGage").GetComponent<Slider>();
         gageImage = GameObject.Find("Fill").GetComponent<Image>();
+        playerPos = GameObject.Find("PlayerPos").gameObject;
 
         rb.maxAngularVelocity = 100;
         
@@ -45,6 +47,7 @@ public class PlayerController : MonoBehaviour
         gage = 0.0f;
         attackFlag = false;
         Element = 0;
+        
     }
 
     // Update is called once per frame
@@ -58,24 +61,26 @@ public class PlayerController : MonoBehaviour
         // 移動
         var moveHorizontal = Input.GetAxis("Horizontal");
         var moveVertical = Input.GetAxis("Vertical");
-        var movement = new Vector3(moveHorizontal * moveDecayRate, 0, moveVertical * moveDecayRate);
+        var movement = new Vector3(moveHorizontal * Mathf.Cos(playerPos.transform.localEulerAngles.y * Mathf.PI / 180) * moveDecayRate
+                                    + moveVertical * Mathf.Sin(playerPos.transform.localEulerAngles.y * Mathf.PI / 180) * moveDecayRate,
+                                    0, 
+                                    moveVertical * Mathf.Cos(playerPos.transform.localEulerAngles.y * Mathf.PI / 180) * moveDecayRate
+                                    - moveHorizontal * Mathf.Sin(playerPos.transform.localEulerAngles.y * Mathf.PI / 180) * moveDecayRate);
         rb.AddForce(movement * speed * Time.deltaTime);
 
         // ジャンプ
         if (Input.GetKeyDown(KeyCode.Z) && onGround)
         {
             onGround = false;
-            //var moveUp = new Vector3(0, 1, 0);
-            //rb.AddForce(moveUp * jumpForce);
             var jumpUp = new Vector3(rb.velocity.x, jumpSpeed, rb.velocity.z);
             rb.velocity = jumpUp;
-            //Debug.Log("call!");
         }
 
         if(Element == 1)
         {
             Rush(movement);
         }
+
 
         // スピードテスト
         //if (Input.GetKeyDown(KeyCode.Q))
@@ -110,7 +115,6 @@ public class PlayerController : MonoBehaviour
             Element = 1;
             gage = 1.0f;
             gageImage.color = Color.yellow;
-            //gageImage.color = Color.red;
         }
     }
 
@@ -157,7 +161,7 @@ public class PlayerController : MonoBehaviour
         // 時間経過でゲージの回復
         if (gage < 1.0f)
         {
-            gage += 0.005f;
+            gage += 0.004f;
             if (gage > 1.0f)
                 gage = 1.0f;
         }
