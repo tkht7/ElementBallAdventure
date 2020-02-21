@@ -8,6 +8,8 @@ TagManager:
   - Goal
   - Element
   - Rush
+  - Pick Up
+  - Flame
   layers:
   - Default
   - TransparentFX
