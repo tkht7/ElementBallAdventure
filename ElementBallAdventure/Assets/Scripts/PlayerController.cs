@@ -186,7 +186,7 @@ public class PlayerController : MonoBehaviour
         {
             var attackDirection = movement.normalized;
             
-            rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y + flameJumpSpeed, rb.velocity.z);
+            rb.velocity = new Vector3(rb.velocity.x, flameJumpSpeed, rb.velocity.z);
 
             gage = 0.0f;
 
@@ -195,10 +195,10 @@ public class PlayerController : MonoBehaviour
             
         }
 
-        // 時間経過でゲージの回復
-        if (gage < 1.0f)
+        // 地上で時間経過でゲージの回復
+        if (gage < 1.0f && onGround)
         {
-            gage += 0.002f;
+            gage += 0.01f;
             if (gage > 1.0f)
                 gage = 1.0f;
         }

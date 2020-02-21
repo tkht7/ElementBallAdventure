@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class AttackedWallController : MonoBehaviour
 {
-    private Transform tf;
     private GameObject pivot;
     private GameObject tp;
     private bool attackedFlag;
@@ -13,7 +12,6 @@ public class AttackedWallController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        tf = GetComponent<Transform>();
         pivot = transform.root.gameObject;
         tp = GameObject.Find("TargetPaint");
         attackedFlag = false;
