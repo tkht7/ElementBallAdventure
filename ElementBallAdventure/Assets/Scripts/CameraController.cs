@@ -26,11 +26,11 @@ public class CameraController : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.F))
         {
-            transform.Rotate(0.0f, 1.0f, 0.0f);
+            transform.Rotate(0.0f, -1.0f, 0.0f);
         }
         if (Input.GetKey(KeyCode.H))
         {
-             transform.Rotate(0.0f, -1.0f, 0.0f);
+             transform.Rotate(0.0f, 1.0f, 0.0f);
         }
         transform.position = player.transform.position;
 

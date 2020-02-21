@@ -8,11 +8,12 @@ public class PlayerController : MonoBehaviour
     public float speed;
     public float jumpSpeed;
     public float attackSpeed;
+    public float flameJumpSpeed;
     public Material[] _material;
 
     public bool attackFlag;
     public Text goalText;
-    public int Element; // 0:Normal, 1:Rush, 
+    public int Element; // 0:Normal, 1:Rush, 2:Flame
 
     private Image gageImage;
     private Rigidbody rb;
@@ -80,6 +81,10 @@ public class PlayerController : MonoBehaviour
         {
             Rush(movement);
         }
+        else if (Element == 2)
+        {
+            Flame(movement);
+        }
 
 
         // スピードテスト
@@ -110,11 +115,17 @@ public class PlayerController : MonoBehaviour
 
         if (collision.gameObject.CompareTag("Rush"))
         {
-            //collision.gameObject.transform.root.gameObject.SetActive(false);
             this.GetComponent<Renderer>().material = _material[1];
             Element = 1;
             gage = 1.0f;
             gageImage.color = Color.yellow;
+        }
+        else if (collision.gameObject.CompareTag("Flame"))
+        {
+            this.GetComponent<Renderer>().material = _material[2];
+            Element = 2;
+            gage = 1.0f;
+            gageImage.color = Color.red;
         }
     }
 
@@ -167,4 +178,31 @@ public class PlayerController : MonoBehaviour
         }
         attackGage.value = gage;
     }
+
+    void Flame(Vector3 movement)
+    {
+        // 大ジャンプ
+        if (Input.GetKeyDown(KeyCode.X) && gage == 1.0f)
+        {
+            var attackDirection = movement.normalized;
+            
+            rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y + flameJumpSpeed, rb.velocity.z);
+
+            gage = 0.0f;
+
+            // エフェクト
+            ps.Play();
+            
+        }
+
+        // 時間経過でゲージの回復
+        if (gage < 1.0f)
+        {
+            gage += 0.002f;
+            if (gage > 1.0f)
+                gage = 1.0f;
+        }
+        attackGage.value = gage;
+    }
+
 }
