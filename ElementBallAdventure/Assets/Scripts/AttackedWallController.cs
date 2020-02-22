@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AttackedWallController : MonoBehaviour
 {
-    private GameObject pivot;
+    private GameObject wall;
     private GameObject tp;
     private bool attackedFlag;
     private bool rotatedFlag;
@@ -12,8 +12,8 @@ public class AttackedWallController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        pivot = transform.root.gameObject;
-        tp = GameObject.Find("TargetPaint");
+        wall = transform.Find("AttackedWall").gameObject;
+        tp = transform.Find("TargetPaint").gameObject;
         attackedFlag = false;
         rotatedFlag = false;
     }
@@ -23,24 +23,24 @@ public class AttackedWallController : MonoBehaviour
     {
         if(attackedFlag && !rotatedFlag)
         {
-            pivot.transform.Rotate(1.0f, 0.0f, 0.0f);
-            if (pivot.transform.eulerAngles.x == 90.0f)
+            transform.Rotate(1.0f, 0.0f, 0.0f);
+            if (transform.eulerAngles.x >= 88.5f)
             {
                 rotatedFlag = true;
+                transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
             }
         }
+        // Debug.Log(transform.eulerAngles.x);
     }
 
-    void OnCollisionEnter(Collision collision)
+    void OnTriggerEnter(Collider collider)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collider.gameObject.tag == "Player")
         {
-            if (collision.gameObject.GetComponent<PlayerController>().attackFlag)
+            if (collider.gameObject.GetComponent<PlayerController>().attackFlag)
             {
-                //Debug.Log(GetComponent<BoxCollider>().material);
-                GetComponent<BoxCollider>().material.bounciness = 0;
+                wall.GetComponent<BoxCollider>().material.bounciness = 0;
                 transform.tag = "Ground";
-                tp.transform.tag = "Ground";
                 attackedFlag = true;
             }
         }

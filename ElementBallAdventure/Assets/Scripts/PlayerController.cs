@@ -7,7 +7,7 @@ public class PlayerController : MonoBehaviour
 {
     public float speed;
     public float jumpSpeed;
-    public float attackSpeed;
+    public float rushSpeed;
     public float flameJumpSpeed;
     public Material[] _material;
 
@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviour
     private int attackCount;
     private Slider attackGage;
     private float gage;
+    private float accel;
 
     private GameObject playerPos;
 
@@ -48,6 +49,7 @@ public class PlayerController : MonoBehaviour
         gage = 0.0f;
         attackFlag = false;
         Element = 0;
+        accel = 1.0f;
         
     }
 
@@ -108,40 +110,50 @@ public class PlayerController : MonoBehaviour
             onGround = false;
     }
 
-    void OnTriggerEnter(Collider collision)
+    void OnTriggerEnter(Collider collider)
     {
-        if (collision.gameObject.CompareTag("Goal"))
+        if (collider.gameObject.CompareTag("Goal"))
             goalText.text = "GOAL!";
 
-        if (collision.gameObject.CompareTag("Rush"))
+        if (collider.gameObject.CompareTag("Rush"))
         {
             this.GetComponent<Renderer>().material = _material[1];
             Element = 1;
             gage = 1.0f;
             gageImage.color = Color.yellow;
         }
-        else if (collision.gameObject.CompareTag("Flame"))
+        else if (collider.gameObject.CompareTag("Flame"))
         {
             this.GetComponent<Renderer>().material = _material[2];
             Element = 2;
             gage = 1.0f;
             gageImage.color = Color.red;
         }
+
     }
 
-    void Rush(Vector3 movement)
+    void OnTriggerStay(Collider collider)
+    {
+        if (collider.gameObject.CompareTag("Accel"))
+        {
+            var tempV = rb.velocity;
+            rb.velocity = new Vector3(tempV.x, tempV.y, tempV.z + accel); // +Z以外に進むやつがいる時はrotationから向きを求めて作る
+        }
+    }
+
+        void Rush(Vector3 movement)
     {
         // 突進
         if (Input.GetKeyDown(KeyCode.X) && gage == 1.0f)
         {
-            var attackDirection = movement.normalized;
-            if (attackDirection != Vector3.zero)
+            var rushDirection = movement.normalized;
+            if (rushDirection != Vector3.zero)
             {
                 rb.useGravity = false;
                 rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
-                rb.AddForce(attackDirection * attackSpeed);
-                var attackRotation = new Vector3(attackDirection.z, 0, -attackDirection.x);
-                rb.AddTorque(attackRotation * Mathf.PI * attackSpeed, ForceMode.Acceleration);
+                rb.AddForce(rushDirection * rushSpeed);
+                var attackRotation = new Vector3(rushDirection.z, 0, -rushDirection.x);
+                rb.AddTorque(attackRotation * Mathf.PI * rushSpeed, ForceMode.Acceleration);
 
                 gage = 0.0f;
                 attackFlag = true;
@@ -198,7 +210,7 @@ public class PlayerController : MonoBehaviour
         // 地上で時間経過でゲージの回復
         if (gage < 1.0f && onGround)
         {
-            gage += 0.01f;
+            gage += 0.02f;
             if (gage > 1.0f)
                 gage = 1.0f;
         }

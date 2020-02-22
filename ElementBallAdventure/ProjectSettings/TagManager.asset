@@ -10,6 +10,7 @@ TagManager:
   - Rush
   - Pick Up
   - Flame
+  - Accel
   layers:
   - Default
   - TransparentFX
