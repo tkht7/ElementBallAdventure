@@ -46,7 +46,7 @@ public class TimeWallController : MonoBehaviour
             if (pivot.transform.position.y - startPivotPos.y > 0.0f) // 元の位置以上に下がらないようにする
             {
                 var tempPos = pivot.transform.position;
-                pivot.transform.position = new Vector3(tempPos.x, tempPos.y - 0.02f, tempPos.z);
+                pivot.transform.position = new Vector3(tempPos.x, tempPos.y - 0.01f, tempPos.z);
             }
         }
     }
@@ -60,14 +60,14 @@ public class TimeWallController : MonoBehaviour
                pivot.transform.position.y - startPivotPos.y < 1.0f) // 壁が閉まりかけの時
             {
                 var dir = 0.0f;
-                if (collision.gameObject.transform.position.x - transform.position.x < 0)
+                if (collision.gameObject.transform.position.x - transform.position.x < 0) // プレイヤーのいる位置からどっちに押し出すか決める
                     dir = -1.0f;
                 else
                     dir = 1.0f;
                 var tempPos = collision.gameObject.transform.position;
-                collision.gameObject.transform.position = new Vector3(pivot.transform.position.x+dir, tempPos.y, tempPos.z); // 壁のない位置にプレイヤーを移動
+                collision.gameObject.transform.position = new Vector3(pivot.transform.position.x+dir, tempPos.y, tempPos.z); // 壁のない位置にプレイヤーを押し出す
 
-                // 違う向きで配置するときはyについて同じことをする
+                // 違う向きで配置するときはyについて同じことをするようにする
             }
         }
     }
@@ -76,17 +76,19 @@ public class TimeWallController : MonoBehaviour
     {
         if (collision.gameObject.tag == "Player")
         {
-            pushFlag = true;
+            
             tag = "Ground";
         }
+        pushFlag = true;
     }
 
     void OnTriggerExit(Collider collision)
     {
         if (collision.gameObject.tag == "Player")
         {
-            pushFlag = false;
+            
             tag = "Untagged";
         }
+        pushFlag = false;
     }
 }
