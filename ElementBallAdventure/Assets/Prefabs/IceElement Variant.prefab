@@ -65,7 +65,7 @@ PrefabInstance:
     - target: {fileID: 6250663032097548631, guid: aa7ca332e8c373a44a611477044c78b9,
         type: 3}
       propertyPath: m_Name
-      value: IceElement
+      value: IceElement Variant
       objectReference: {fileID: 0}
     - target: {fileID: 6250663032097548631, guid: aa7ca332e8c373a44a611477044c78b9,
         type: 3}
@@ -97,6 +97,11 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 1a85441b4d1aafb4db3c371365364ad2, type: 2}
+    - target: {fileID: 6250663032473040223, guid: aa7ca332e8c373a44a611477044c78b9,
+        type: 3}
+      propertyPath: m_TagString
+      value: Ice
+      objectReference: {fileID: 0}
     - target: {fileID: 6250663032960959481, guid: aa7ca332e8c373a44a611477044c78b9,
         type: 3}
       propertyPath: m_LocalScale.z
