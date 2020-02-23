@@ -85,7 +85,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (Element == 2)
         {
-            Flame(movement);
+            Flame();
         }
 
 
@@ -121,6 +121,7 @@ public class PlayerController : MonoBehaviour
             Element = 1;
             gage = 1.0f;
             gageImage.color = Color.yellow;
+            ps.startColor = Color.yellow;
         }
         else if (collider.gameObject.CompareTag("Flame"))
         {
@@ -128,6 +129,7 @@ public class PlayerController : MonoBehaviour
             Element = 2;
             gage = 1.0f;
             gageImage.color = Color.red;
+            ps.startColor = Color.red;
         }
 
     }
@@ -191,13 +193,11 @@ public class PlayerController : MonoBehaviour
         attackGage.value = gage;
     }
 
-    void Flame(Vector3 movement)
+    void Flame()
     {
         // 大ジャンプ
         if (Input.GetKeyDown(KeyCode.X) && gage == 1.0f)
-        {
-            var attackDirection = movement.normalized;
-            
+        {            
             rb.velocity = new Vector3(rb.velocity.x, flameJumpSpeed, rb.velocity.z);
 
             gage = 0.0f;
