@@ -12,6 +12,7 @@ TagManager:
   - Flame
   - Accel
   - Ice
+  - WindZone
   layers:
   - Default
   - TransparentFX
