@@ -7,29 +7,28 @@ public class ElementController : MonoBehaviour
     private GameObject container;
     private GameObject content1;
     private GameObject content2;
-    private int count;
-
-    // Start is called before the first frame update
+    private float count;
+    
     void Start()
     {
         container = transform.Find("ElementContainer").gameObject;
         content1 = transform.Find("ElementContent1").gameObject;
         content2 = transform.Find("ElementContent2").gameObject;
-        count = 0;
+        count = 0.0f;
     }
-
-    // Update is called once per frame
+    
     void Update()
     {
+        // アイテム取得後，一定時間経過でアイテム復活
         if (!container.activeSelf)
         {
-            count++;
-            if (count >= 300)
+            count += Time.deltaTime;
+            if (count >= 5.0f)
             {
                 container.SetActive(true);
                 content1.SetActive(true);
                 content2.SetActive(true);
-                count = 0;
+                count = 0.0f;
             }
         }
     }

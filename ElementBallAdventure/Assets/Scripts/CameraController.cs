@@ -9,7 +9,7 @@ public class CameraController : MonoBehaviour
     private GameObject mainCamera;
     private GameObject subCamera;
 
-    private Vector3 offset; // 球からカメラまでの距離
+    //private Vector3 offset; // 球からカメラまでの距離
     private Quaternion startAngle;
     
     
@@ -18,7 +18,7 @@ public class CameraController : MonoBehaviour
         mainCamera = transform.Find("Main Camera").gameObject;
         subCamera = transform.Find("Sub Camera").gameObject;
         transform.position = player.transform.position;
-        offset = mainCamera.transform.position - transform.position;
+        //offset = mainCamera.transform.position - transform.position;
         startAngle = mainCamera.transform.rotation;
     }
     
@@ -26,11 +26,11 @@ public class CameraController : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.F))
         {
-            transform.Rotate(0.0f, -1.0f, 0.0f);
+            transform.Rotate(0.0f, -60.0f * Time.deltaTime, 0.0f);
         }
         if (Input.GetKey(KeyCode.H))
         {
-             transform.Rotate(0.0f, 1.0f, 0.0f);
+             transform.Rotate(0.0f, 60.0f * Time.deltaTime, 0.0f);
         }
         transform.position = player.transform.position;
 

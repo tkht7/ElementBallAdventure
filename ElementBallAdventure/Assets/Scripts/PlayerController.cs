@@ -11,26 +11,29 @@ public class PlayerController : MonoBehaviour
     public float flameJumpSpeed;
     public Material[] _material;
 
-    public bool attackFlag;
+    public bool rushFlag;
     public Text goalText;
     public int Element; // 0:Normal, 1:Rush, 2:Flame, 3:Ice
 
     private Image gageImage;
     private Rigidbody rb;
     private ParticleSystem ps;
-    private GameObject shell_1;
-    private GameObject shell_2;
+    private ParticleSystem.MainModule psColor;
+    private GameObject shell1;
+    private GameObject shell2;
+    private BoxCollider shellCollider1;
+    private BoxCollider shellCollider2;
 
     private bool onGround;
     private float moveDecayRate;
-    private int attackCount;
+    private float rushCount;
     private Slider elementGage;
     private float gage;
     private float accel;
     private bool useIceStart;
     private bool useIce;
     private bool iceFlag;
-    private int iceCount;
+    private float iceCount;
     private GameObject frozenObject;
     private Vector3 FrozenPos;
 
@@ -42,29 +45,32 @@ public class PlayerController : MonoBehaviour
         // Rigidbody取得
         rb = GetComponent<Rigidbody>();
         ps = GetComponent<ParticleSystem>();
+        psColor = GetComponent<ParticleSystem>().main;
 
         elementGage = GameObject.Find("AttackGage").GetComponent<Slider>();
         gageImage = GameObject.Find("Fill").GetComponent<Image>();
         playerPos = GameObject.Find("PlayerPos").gameObject;
 
-        shell_1 = transform.Find("IceShell1").gameObject;
-        shell_2 = transform.Find("IceShell2").gameObject;
+        shell1 = transform.Find("IceShell1").gameObject;
+        shell2 = transform.Find("IceShell2").gameObject;
+        shellCollider1 = shell1.GetComponent<BoxCollider>();
+        shellCollider2 = shell2.GetComponent<BoxCollider>();
 
         rb.maxAngularVelocity = 100;
-        
+
         goalText.text = "";
 
         onGround = false;
         moveDecayRate = 1.0f;
-        attackCount = 0;
+        rushCount = 0.0f;
         gage = 0.0f;
-        attackFlag = false;
+        rushFlag = false;
         Element = 0;
         accel = 1.0f;
         useIceStart = false;
         useIce = false;
         iceFlag = false;
-        iceCount = 0;
+        iceCount = 0.0f;
     }
 
     // Update is called once per frame
@@ -80,14 +86,12 @@ public class PlayerController : MonoBehaviour
         var moveVertical = Input.GetAxis("Vertical");
         var movement = new Vector3(moveHorizontal * Mathf.Cos(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate
                                     + moveVertical * Mathf.Sin(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate,
-                                    0, 
+                                    0,
                                     moveVertical * Mathf.Cos(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate
                                     - moveHorizontal * Mathf.Sin(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate);
-        //Debug.Log(Mathf.Cos(playerPos.transform.localEulerAngles.y));
-        if(!useIce)
+        if (!useIce)
             rb.AddForce(movement * speed * Time.deltaTime);
 
-        //Debug.Log(movement * speed * Time.deltaTime);
 
         // ジャンプ
         if (Input.GetKeyDown(KeyCode.Z) && onGround && !useIce)
@@ -97,7 +101,7 @@ public class PlayerController : MonoBehaviour
             rb.velocity = jumpUp;
         }
 
-        if(Element == 1)
+        if (Element == 1)
         {
             Rush(movement);
         }
@@ -122,11 +126,12 @@ public class PlayerController : MonoBehaviour
         //Debug.Log(useIceStart);
         //Debug.Log(useIce);
         //Debug.Log(iceFlag);
+        Debug.Log(Time.deltaTime);
     }
 
     void OnCollisionStay(Collision collision)
     {
-        if(collision.gameObject.CompareTag("Ground"))
+        if (collision.gameObject.CompareTag("Ground"))
             onGround = true;
     }
 
@@ -147,7 +152,7 @@ public class PlayerController : MonoBehaviour
             Element = 1;
             gage = 1.0f;
             gageImage.color = Color.yellow;
-            ps.startColor = Color.yellow;
+            psColor.startColor = Color.yellow;
         }
         else if (collider.gameObject.CompareTag("Flame"))
         {
@@ -155,7 +160,7 @@ public class PlayerController : MonoBehaviour
             Element = 2;
             gage = 1.0f;
             gageImage.color = Color.red;
-            ps.startColor = Color.red;
+            psColor.startColor = Color.red;
         }
         else if (collider.gameObject.CompareTag("Ice"))
         {
@@ -163,12 +168,13 @@ public class PlayerController : MonoBehaviour
             Element = 3;
             gage = 1.0f;
             gageImage.color = Color.cyan;
-            ps.startColor = Color.cyan;
+            psColor.startColor = Color.cyan;
         }
 
-        if (useIceStart)
+        if (useIceStart && !collider.gameObject.CompareTag("WindZone"))
         {
             iceFlag = true;
+            rb.isKinematic = true;
             frozenObject = collider.gameObject;
             FrozenPos = frozenObject.transform.position;
         }
@@ -184,7 +190,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-        void Rush(Vector3 movement)
+    void Rush(Vector3 movement)
     {
         // 突進
         if (Input.GetKeyDown(KeyCode.X) && gage == 1.0f)
@@ -195,11 +201,11 @@ public class PlayerController : MonoBehaviour
                 rb.useGravity = false;
                 rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
                 rb.AddForce(rushDirection * rushSpeed);
-                var attackRotation = new Vector3(rushDirection.z, 0, -rushDirection.x);
-                rb.AddTorque(attackRotation * Mathf.PI * rushSpeed, ForceMode.Acceleration);
+                var rushRotation = new Vector3(rushDirection.z, 0, -rushDirection.x);
+                rb.AddTorque(rushRotation * Mathf.PI * rushSpeed, ForceMode.Acceleration);
 
                 gage = 0.0f;
-                attackFlag = true;
+                rushFlag = true;
 
                 // エフェクト
                 ps.Play();
@@ -207,27 +213,27 @@ public class PlayerController : MonoBehaviour
         }
 
         // 突進から一定時間は重力の影響を受けない
-        if (attackCount >= 15)
+        if (rushCount >= 0.25f)
         {
             rb.useGravity = true;
         }
 
         // 突進から一定時間，突進を使ってることのフラグを立てる
-        if (attackCount >= 70)
+        if (rushCount >= 1.2f)
         {
-            attackFlag = false;
-            attackCount = 0;
+            rushFlag = false;
+            rushCount = 0.0f;
         }
 
-        if (attackFlag)
+        if (rushFlag)
         {
-            attackCount++;
+            rushCount += Time.deltaTime;
         }
 
         // 時間経過でゲージの回復
         if (gage < 1.0f)
         {
-            gage += 0.004f;
+            gage += Time.deltaTime * 0.25f;
             if (gage > 1.0f)
                 gage = 1.0f;
         }
@@ -238,20 +244,20 @@ public class PlayerController : MonoBehaviour
     {
         // 大ジャンプ
         if (Input.GetKeyDown(KeyCode.X) && gage == 1.0f)
-        {            
+        {
             rb.velocity = new Vector3(rb.velocity.x, flameJumpSpeed, rb.velocity.z);
 
             gage = 0.0f;
 
             // エフェクト
             ps.Play();
-            
+
         }
 
         // 地上で時間経過でゲージの回復
         if (gage < 1.0f && onGround)
         {
-            gage += 0.02f;
+            gage += Time.deltaTime;
             if (gage > 1.0f)
                 gage = 1.0f;
         }
@@ -263,28 +269,27 @@ public class PlayerController : MonoBehaviour
         // 自身の回りに氷を張る
         if (Input.GetKeyDown(KeyCode.X) && gage > 0.0f)
         {
-            shell_1.SetActive(true);
-            shell_2.SetActive(true);
+            shell1.SetActive(true);
+            shell2.SetActive(true);
 
             useIceStart = true;
             useIce = true;
-            gage -= 0.001f;
 
-            // エフェクト
-            ps.Play();
+            // エフェクト いらないかも
+            //ps.Play();
 
         }
-        // 氷を張った瞬間(iceCount5以内)に物体に触れてなかったら張り付けない
-        else if (Input.GetKey(KeyCode.X) && gage > 0.0f && shell_1.activeSelf)
+        // 氷を張った瞬間(iceCount0.1f以内)に物体に触れてなかったら張り付けない
+        else if (Input.GetKey(KeyCode.X) && gage > 0.0f && shell1.activeSelf)
         {
-            iceCount++;
-            if (!iceFlag && useIceStart && iceCount == 5)
+            iceCount += Time.deltaTime;
+            if (!iceFlag && useIceStart && iceCount >= 0.1f)
             {
-                shell_1.GetComponent<BoxCollider>().isTrigger = false;
-                shell_2.GetComponent<BoxCollider>().isTrigger = false;
+                shellCollider1.isTrigger = false;
+                shellCollider2.isTrigger = false;
                 useIceStart = false;
             }
-            gage -= 0.001f;
+            gage -= Time.deltaTime * 0.05f;
 
         }
 
@@ -294,18 +299,17 @@ public class PlayerController : MonoBehaviour
             useIceStart = false;
             useIce = false;
             iceFlag = false;
-            shell_1.GetComponent<BoxCollider>().isTrigger = true;
-            shell_2.GetComponent<BoxCollider>().isTrigger = true;
+            shellCollider1.isTrigger = true;
+            shellCollider2.isTrigger = true;
             rb.isKinematic = false;
-            shell_1.SetActive(false);
-            shell_2.SetActive(false);
-            iceCount = 0;
+            shell1.SetActive(false);
+            shell2.SetActive(false);
+            iceCount = 0.0f;
         }
 
         // 張り付いた時，その物体と一緒に動く
         if (iceFlag)
         {
-            rb.isKinematic = true;
             var preFrozenPos = FrozenPos;
             FrozenPos = frozenObject.transform.position;
             transform.position = new Vector3(transform.position.x + (FrozenPos.x - preFrozenPos.x),
@@ -316,7 +320,7 @@ public class PlayerController : MonoBehaviour
         // 地上で時間経過でゲージの回復
         if (gage < 1.0f && onGround && !useIce)
         {
-            gage += 0.004f;
+            gage += Time.deltaTime * 0.25f;
             if (gage > 1.0f)
                 gage = 1.0f;
         }

@@ -23,7 +23,7 @@ public class AttackedWallController : MonoBehaviour
     {
         if(attackedFlag && !rotatedFlag)
         {
-            transform.Rotate(1.0f, 0.0f, 0.0f);
+            transform.Rotate(60.0f * Time.deltaTime, 0.0f, 0.0f);
             if (transform.eulerAngles.x >= 88.5f)
             {
                 rotatedFlag = true;
@@ -35,9 +35,9 @@ public class AttackedWallController : MonoBehaviour
 
     void OnTriggerEnter(Collider collider)
     {
-        if (collider.gameObject.tag == "Player")
+        if (collider.gameObject.CompareTag("Player"))
         {
-            if (collider.gameObject.GetComponent<PlayerController>().attackFlag)
+            if (collider.gameObject.GetComponent<PlayerController>().rushFlag)
             {
                 wall.GetComponent<BoxCollider>().material.bounciness = 0;
                 transform.tag = "Ground";

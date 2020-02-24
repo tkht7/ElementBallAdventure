@@ -28,12 +28,16 @@ public class TimeWallController : MonoBehaviour
             if(startButtonPos.y - button.transform.position.y < 0.2f) // 押し込みの制限
             {
                 var tempPos = button.transform.position;
-                button.transform.position = new Vector3(tempPos.x, tempPos.y - 0.01f, tempPos.z);
+                button.transform.position = new Vector3(tempPos.x, tempPos.y - Time.deltaTime, tempPos.z);
+                if (startButtonPos.y - button.transform.position.y > 0.2f) // 制限を超えた分戻す
+                    button.transform.position = new Vector3(tempPos.x, startButtonPos.y - 0.2f, tempPos.z);
             }
             if(pivot.transform.position.y - startPivotPos.y < 8.0f) // 壁を上げる位置の制限
             {
                 var tempPos = pivot.transform.position;
-                pivot.transform.position = new Vector3(tempPos.x, tempPos.y + 0.1f, tempPos.z);
+                pivot.transform.position = new Vector3(tempPos.x, tempPos.y + Time.deltaTime * 8.0f, tempPos.z);
+                if (pivot.transform.position.y - startPivotPos.y > 8.0f) // 制限を超えた分戻す
+                    pivot.transform.position = new Vector3(tempPos.x, startPivotPos.y + 8.0f, tempPos.z);
             }
         }
         else
@@ -41,12 +45,16 @@ public class TimeWallController : MonoBehaviour
             if (startButtonPos.y - button.transform.position.y > 0.0f) // 元の位置まで戻るようにする
             {
                 var tempPos = button.transform.position;
-                button.transform.position = new Vector3(tempPos.x, tempPos.y + 0.01f, tempPos.z);
+                button.transform.position = new Vector3(tempPos.x, tempPos.y + Time.deltaTime, tempPos.z);
+                if (startButtonPos.y - button.transform.position.y < 0.0f) // 元の位置以上に上がらないようにする
+                    button.transform.position = startButtonPos;
             }
-            if (pivot.transform.position.y - startPivotPos.y > 0.0f) // 元の位置以上に下がらないようにする
+            if (pivot.transform.position.y - startPivotPos.y > 0.0f) // 元の位置まで下げる
             {
                 var tempPos = pivot.transform.position;
-                pivot.transform.position = new Vector3(tempPos.x, tempPos.y - 0.01f, tempPos.z);
+                pivot.transform.position = new Vector3(tempPos.x, tempPos.y - Time.deltaTime, tempPos.z);
+                if (pivot.transform.position.y - startPivotPos.y < 0.0f) // 元の位置以上に下がらないようにする
+                    pivot.transform.position = startPivotPos;
             }
         }
     }
@@ -72,21 +80,20 @@ public class TimeWallController : MonoBehaviour
         }
     }
 
-    void OnTriggerStay(Collider collision)
+    void OnTriggerStay(Collider collider)
     {
-        if (collision.gameObject.tag == "Player")
+        // ボタンにプレイヤーが乗った時，ジャンプできるようにする
+        if (collider.gameObject.CompareTag("Player"))
         {
-            
             tag = "Ground";
         }
         pushFlag = true;
     }
 
-    void OnTriggerExit(Collider collision)
+    void OnTriggerExit(Collider collider)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collider.gameObject.CompareTag("Player"))
         {
-            
             tag = "Untagged";
         }
         pushFlag = false;
