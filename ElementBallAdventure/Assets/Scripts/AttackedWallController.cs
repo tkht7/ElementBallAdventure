@@ -22,10 +22,11 @@ public class AttackedWallController : MonoBehaviour
         // 相手が突進状態でぶつかってきたら壁を倒し始める
         if(attackedFlag && !rotatedFlag)
         {
-            transform.Rotate(60.0f * Time.deltaTime, 0.0f, 0.0f);
+            //transform.Rotate(60.0f * Time.deltaTime, 0.0f, 0.0f);
             totalRotation += 60.0f * Time.deltaTime;
+            transform.rotation = Quaternion.Euler(totalRotation, 0.0f, 0.0f);
             // 90度回転で止める(判定を少し早めにする)
-            if (totalRotation >= 88.5f)
+            if (totalRotation >= 90.0f)
             {
                 rotatedFlag = true;
                 transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);

@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class TimeWallController : MonoBehaviour
 {
-    public AudioClip timeWallSound;
     private AudioSource audioSource;
+    private float pushCount;
 
     private GameObject pivot; // 壁の基準位置
     private GameObject button;
@@ -16,6 +16,7 @@ public class TimeWallController : MonoBehaviour
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
+        pushCount = 0.0f;
         pivot = transform.Find("TimeWallPivot").gameObject;
         button = transform.Find("TimeWallButton").gameObject;
         pushFlag = false;
@@ -33,15 +34,20 @@ public class TimeWallController : MonoBehaviour
                 button.transform.position = new Vector3(tempPos.x, tempPos.y - Time.deltaTime, tempPos.z);
                 if (startButtonPos.y - button.transform.position.y > 0.2f) // 制限を超えた分戻す
                     button.transform.position = new Vector3(tempPos.x, startButtonPos.y - 0.2f, tempPos.z);
-
-                audioSource.PlayOneShot(timeWallSound);
             }
             if(pivot.transform.position.y - startPivotPos.y < 8.0f) // 壁を上げる位置の制限
             {
                 var tempPos = pivot.transform.position;
                 pivot.transform.position = new Vector3(tempPos.x, tempPos.y + Time.deltaTime * 8.0f, tempPos.z);
+                if (pushCount <= 0.0f) // 壁が上がってる間だけ効果音をならす
+                    audioSource.Play();
+                pushCount = 0.3f;
                 if (pivot.transform.position.y - startPivotPos.y > 8.0f) // 制限を超えた分戻す
+                {
                     pivot.transform.position = new Vector3(tempPos.x, startPivotPos.y + 8.0f, tempPos.z);
+                    audioSource.Stop();
+                }
+                
             }
         }
         else
@@ -60,6 +66,9 @@ public class TimeWallController : MonoBehaviour
                 if (pivot.transform.position.y - startPivotPos.y < 0.0f) // 元の位置以上に下がらないようにする
                     pivot.transform.position = startPivotPos;
             }
+            if(pushCount <= 0.0f)
+                audioSource.Stop();
+            pushCount -= Time.deltaTime;
         }
     }
 

@@ -6,7 +6,6 @@ using UnityEngine.UI;
 public class GoalDetector : MonoBehaviour
 {
     public Text goalText;
-    public AudioClip goalSound;
     private AudioSource audioSource;
 
     private Director director;
@@ -27,7 +26,7 @@ public class GoalDetector : MonoBehaviour
         {
             calledFlag = true;
             goalText.text = "GOAL!";
-            audioSource.PlayOneShot(goalSound);
+            audioSource.Play();
 
             // 3秒後にステージ遷移する
             Invoke("NextStage", 3);

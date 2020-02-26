@@ -10,7 +10,6 @@ public class WindZoneController : MonoBehaviour
     private float windPersistence;
     private float windPower;
 
-    public AudioClip windZoneSound;
     private AudioSource audioSource;
 
     void Start()
@@ -32,13 +31,28 @@ public class WindZoneController : MonoBehaviour
         }
     }
 
+    void OnTriggerEnter(Collider collider)
+    {
+        if (collider.gameObject.CompareTag("Player"))
+        {
+            audioSource.Play();
+        }
+    }
+
     void OnTriggerStay(Collider collider)
     {
         if (collider.gameObject.CompareTag("Player"))
         {
             var rb = collider.gameObject.GetComponent<Rigidbody>();
             rb.AddForce(Vector3.back * windPower * Time.deltaTime);
-            audioSource.PlayOneShot(windZoneSound);
+        }
+    }
+
+    void OnTriggerExit(Collider collider)
+    {
+        if (collider.gameObject.CompareTag("Player"))
+        {
+            audioSource.Stop();
         }
     }
 }
