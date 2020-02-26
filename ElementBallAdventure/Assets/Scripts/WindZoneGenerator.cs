@@ -16,13 +16,11 @@ public class WindZoneGenerator : MonoBehaviour
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
-
         player = GameObject.Find("Player");
         span = 4.0f;
         delta = 0.0f;
     }
-
-    // Update is called once per frame
+    
     void Update()
     {
         // プレイヤーが近づいた時だけ生成する

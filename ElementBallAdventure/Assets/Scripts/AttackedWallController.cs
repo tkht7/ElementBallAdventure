@@ -40,6 +40,7 @@ public class AttackedWallController : MonoBehaviour
         {
             if (collider.gameObject.GetComponent<PlayerController>().rushFlag)
             {
+                // 倒れたら反発係数をゼロにしてGroundタグをつける(ジャンプできるようにする)
                 wall.GetComponent<BoxCollider>().material.bounciness = 0;
                 transform.tag = "Ground";
                 attackedFlag = true;

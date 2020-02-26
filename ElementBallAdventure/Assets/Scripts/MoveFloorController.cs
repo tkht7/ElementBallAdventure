@@ -4,17 +4,16 @@ using UnityEngine;
 
 public class MoveFloorController : MonoBehaviour
 {
-    public bool[] moveDirect = new bool[3];
-    public bool[] reverse = new bool[3];
-    public float moveDistance;
-    public float moveSpeed;
+    public bool[] moveDirect = new bool[3]; // 動く方向
+    public bool[] reverse = new bool[3]; // 最初に動く向きを反転
+    public float moveDistance; // 動く距離
+    public float moveSpeed; // 動く速さ
 
     private Rigidbody rb;
     private float[] rev = { 1.0f, 1.0f, 1.0f };
     private float[] startPos = new float[3];
     private float[] updatePos = new float[3];
-
-    // Start is called before the first frame update
+    
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -28,8 +27,7 @@ public class MoveFloorController : MonoBehaviour
             updatePos[i] = startPos[i];
         }
 }
-
-    // Update is called once per frame
+    
     void FixedUpdate()
     {
         for (int i = 0; i < moveDirect.Length; i++)
