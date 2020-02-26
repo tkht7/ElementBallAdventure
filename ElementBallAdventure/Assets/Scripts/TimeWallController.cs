@@ -12,20 +12,17 @@ public class TimeWallController : MonoBehaviour
     private bool pushFlag;
     private Vector3 startPivotPos;
     private Vector3 startButtonPos;
-
-    // Start is called before the first frame update
+    
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
-
         pivot = transform.Find("TimeWallPivot").gameObject;
         button = transform.Find("TimeWallButton").gameObject;
         pushFlag = false;
         startPivotPos = pivot.transform.position;
         startButtonPos = button.transform.position;
     }
-
-    // Update is called once per frame
+    
     void Update()
     {
         if (pushFlag) // ボタンが押されてるときは壁を上げて，ボタンを下げる(押されてる感じにする)

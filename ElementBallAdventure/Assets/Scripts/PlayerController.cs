@@ -15,7 +15,7 @@ public class PlayerController : MonoBehaviour
     public AudioClip flameSound;
     public AudioClip iceSound;
     public AudioClip itemGetSound;
-    AudioSource audioSource;
+    private AudioSource audioSource;
 
     private int Element; // 0:Normal, 1:Rush, 2:Flame, 3:Ice
     private Image gageImage;
@@ -42,8 +42,7 @@ public class PlayerController : MonoBehaviour
 
     // カメラ位置・角度
     private GameObject playerPos;
-
-    // Start is called before the first frame update
+    
     void Start()
     {
         audioSource = GetComponent<AudioSource>();

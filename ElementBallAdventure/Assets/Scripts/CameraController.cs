@@ -34,12 +34,14 @@ public class CameraController : MonoBehaviour
         }
         transform.position = player.transform.position;
 
+        // 初期のカメラ位置に戻す
         if (Input.GetKeyDown(KeyCode.N))
         {
             transform.rotation = Quaternion.Euler(Vector3.zero);
             mainCamera.transform.rotation = startAngle;
         }
 
+        // カメラ切り替え
         if (Input.GetKeyDown(KeyCode.G))
         {
             mainCamera.SetActive(!mainCamera.activeSelf);

@@ -105,8 +105,8 @@ public class Director : SingletonMonoBehaviour<Director>
     //シーンの読み込みと待機を行うコルーチン
     IEnumerator WaitForLoadScene(int stageNum)
     {
+        // キャラの移動を停止させる
         playerRigidbody.isKinematic = true;
-
         //フェードオブジェクトを生成
         fadeCanvasClone = Instantiate(fadeCanvasPrefab);
         //コンポーネントを取得
@@ -134,7 +134,7 @@ public class Director : SingletonMonoBehaviour<Director>
     //ゲームオーバー処理
     public void GameOver()
     {
-        //キャラの移動を停止させる
+        // キャラの移動を停止させる
         playerRigidbody.isKinematic = true;
         
         //ゲームオーバー画面表示

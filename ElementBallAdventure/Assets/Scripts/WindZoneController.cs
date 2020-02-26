@@ -11,22 +11,21 @@ public class WindZoneController : MonoBehaviour
     private float windPower;
 
     public AudioClip windZoneSound;
-    AudioSource audioSource;
+    private AudioSource audioSource;
 
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
-
         startPos = transform.position;
         windSpeed = -40.0f;
         windPersistence = 86.0f;
         windPower = 6000.0f;
     }
-
-    // Update is called once per frame
+    
     void Update()
     {
         transform.Translate(0.0f, 0.0f, windSpeed * Time.deltaTime);
+        // 一定距離進んだら消える
         if (startPos.z - transform.position.z > windPersistence)
         {
             Destroy(gameObject);

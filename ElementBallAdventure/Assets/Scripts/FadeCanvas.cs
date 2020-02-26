@@ -12,7 +12,7 @@ public class FadeCanvas : MonoBehaviour
     public bool fadeOut = false;
 
     [SerializeField]
-    Image panelImage;
+    private Image panelImage;
 
     float red, green, blue, alpha;
     
