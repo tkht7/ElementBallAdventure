@@ -5,6 +5,9 @@ using UnityEngine;
 public class WindZoneGenerator : MonoBehaviour
 {
     public GameObject WindZone;
+    
+    public AudioClip windGenerateSound;
+    private AudioSource audioSource;
 
     private GameObject player;
     private float span;
@@ -12,6 +15,8 @@ public class WindZoneGenerator : MonoBehaviour
 
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
+
         player = GameObject.Find("Player");
         span = 4.0f;
         delta = 0.0f;
@@ -29,6 +34,7 @@ public class WindZoneGenerator : MonoBehaviour
                 delta = 0.0f;
                 GameObject wind = Instantiate(WindZone) as GameObject;
                 wind.transform.position = new Vector3(-7.0f, 32.0f, 306.0f);
+                audioSource.PlayOneShot(windGenerateSound);
             }
         }
     }

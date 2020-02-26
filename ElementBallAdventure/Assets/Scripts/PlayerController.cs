@@ -11,10 +11,13 @@ public class PlayerController : MonoBehaviour
     public float flameJumpSpeed;
     public Material[] _material;
 
-    public bool rushFlag;
-    public Text goalText;
-    public int Element; // 0:Normal, 1:Rush, 2:Flame, 3:Ice
+    public AudioClip rushSound;
+    public AudioClip flameSound;
+    public AudioClip iceSound;
+    public AudioClip itemGetSound;
+    AudioSource audioSource;
 
+    private int Element; // 0:Normal, 1:Rush, 2:Flame, 3:Ice
     private Image gageImage;
     private Rigidbody rb;
     private ParticleSystem ps;
@@ -26,10 +29,10 @@ public class PlayerController : MonoBehaviour
 
     private bool onGround;
     private float moveDecayRate;
+    public bool rushFlag;
     private float rushCount;
     private Slider elementGage;
     private float gage;
-    private float accel;
     private bool useIceStart;
     private bool useIce;
     private bool iceFlag;
@@ -37,11 +40,14 @@ public class PlayerController : MonoBehaviour
     private GameObject frozenObject;
     private Vector3 FrozenPos;
 
+    // カメラ位置・角度
     private GameObject playerPos;
 
     // Start is called before the first frame update
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
+
         // Rigidbody取得
         rb = GetComponent<Rigidbody>();
         ps = GetComponent<ParticleSystem>();
@@ -56,17 +62,14 @@ public class PlayerController : MonoBehaviour
         shellCollider1 = shell1.GetComponent<BoxCollider>();
         shellCollider2 = shell2.GetComponent<BoxCollider>();
 
-        rb.maxAngularVelocity = 100;
-
-        goalText.text = "";
-
+        rb.maxAngularVelocity = 100; // 最大回転速度の上限を上げる
+        
         onGround = false;
         moveDecayRate = 1.0f;
         rushCount = 0.0f;
         gage = 0.0f;
         rushFlag = false;
         Element = 0;
-        accel = 1.0f;
         useIceStart = false;
         useIce = false;
         iceFlag = false;
@@ -86,7 +89,7 @@ public class PlayerController : MonoBehaviour
         var moveVertical = Input.GetAxis("Vertical");
         var movement = new Vector3(moveHorizontal * Mathf.Cos(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate
                                     + moveVertical * Mathf.Sin(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate,
-                                    0,
+                                    0.0f,
                                     moveVertical * Mathf.Cos(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate
                                     - moveHorizontal * Mathf.Sin(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate);
         if (!useIce)
@@ -123,10 +126,8 @@ public class PlayerController : MonoBehaviour
         //}
         //Debug.Log(rb.velocity);
 
-        //Debug.Log(useIceStart);
-        //Debug.Log(useIce);
-        //Debug.Log(iceFlag);
-        Debug.Log(Time.deltaTime);
+        
+        //Debug.Log(Time.deltaTime);
     }
 
     void OnCollisionStay(Collision collision)
@@ -143,9 +144,6 @@ public class PlayerController : MonoBehaviour
 
     void OnTriggerEnter(Collider collider)
     {
-        if (collider.gameObject.CompareTag("Goal"))
-            goalText.text = "GOAL!";
-
         if (collider.gameObject.CompareTag("Rush"))
         {
             this.GetComponent<Renderer>().material = _material[1];
@@ -153,6 +151,7 @@ public class PlayerController : MonoBehaviour
             gage = 1.0f;
             gageImage.color = Color.yellow;
             psColor.startColor = Color.yellow;
+            audioSource.PlayOneShot(itemGetSound);
         }
         else if (collider.gameObject.CompareTag("Flame"))
         {
@@ -161,6 +160,7 @@ public class PlayerController : MonoBehaviour
             gage = 1.0f;
             gageImage.color = Color.red;
             psColor.startColor = Color.red;
+            audioSource.PlayOneShot(itemGetSound);
         }
         else if (collider.gameObject.CompareTag("Ice"))
         {
@@ -169,6 +169,7 @@ public class PlayerController : MonoBehaviour
             gage = 1.0f;
             gageImage.color = Color.cyan;
             psColor.startColor = Color.cyan;
+            audioSource.PlayOneShot(itemGetSound);
         }
 
         if (useIceStart && !collider.gameObject.CompareTag("WindZone"))
@@ -179,15 +180,6 @@ public class PlayerController : MonoBehaviour
             FrozenPos = frozenObject.transform.position;
         }
 
-    }
-
-    void OnTriggerStay(Collider collider)
-    {
-        if (collider.gameObject.CompareTag("Accel"))
-        {
-            var tempV = rb.velocity;
-            rb.velocity = new Vector3(tempV.x, tempV.y, tempV.z + accel); // +Z以外に進むやつがいる時はrotationから向きを求めて作る
-        }
     }
 
     void Rush(Vector3 movement)
@@ -206,6 +198,9 @@ public class PlayerController : MonoBehaviour
 
                 gage = 0.0f;
                 rushFlag = true;
+
+                // 効果音
+                audioSource.PlayOneShot(rushSound);
 
                 // エフェクト
                 ps.Play();
@@ -249,6 +244,9 @@ public class PlayerController : MonoBehaviour
 
             gage = 0.0f;
 
+            // 効果音
+            audioSource.PlayOneShot(flameSound);
+
             // エフェクト
             ps.Play();
 
@@ -274,6 +272,9 @@ public class PlayerController : MonoBehaviour
 
             useIceStart = true;
             useIce = true;
+
+            // 効果音
+            audioSource.PlayOneShot(iceSound);
 
             // エフェクト いらないかも
             //ps.Play();
@@ -312,9 +313,9 @@ public class PlayerController : MonoBehaviour
         {
             var preFrozenPos = FrozenPos;
             FrozenPos = frozenObject.transform.position;
-            transform.position = new Vector3(transform.position.x + (FrozenPos.x - preFrozenPos.x),
-                                             transform.position.y + (FrozenPos.y - preFrozenPos.y),
-                                             transform.position.z + (FrozenPos.z - preFrozenPos.z));
+            rb.position = new Vector3(rb.position.x + (FrozenPos.x - preFrozenPos.x),
+                                      rb.position.y + (FrozenPos.y - preFrozenPos.y),
+                                      rb.position.z + (FrozenPos.z - preFrozenPos.z));
         }
 
         // 地上で時間経過でゲージの回復

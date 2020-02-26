@@ -5,26 +5,27 @@ using UnityEngine;
 public class AttackedWallController : MonoBehaviour
 {
     private GameObject wall;
-    private GameObject tp;
     private bool attackedFlag;
     private bool rotatedFlag;
-
-    // Start is called before the first frame update
+    private float totalRotation;
+    
     void Start()
     {
         wall = transform.Find("AttackedWall").gameObject;
-        tp = transform.Find("TargetPaint").gameObject;
         attackedFlag = false;
         rotatedFlag = false;
+        totalRotation = 0.0f;
     }
-
-    // Update is called once per frame
+    
     void Update()
     {
+        // 相手が突進状態でぶつかってきたら壁を倒し始める
         if(attackedFlag && !rotatedFlag)
         {
             transform.Rotate(60.0f * Time.deltaTime, 0.0f, 0.0f);
-            if (transform.eulerAngles.x >= 88.5f)
+            totalRotation += 60.0f * Time.deltaTime;
+            // 90度回転で止める(判定を少し早めにする)
+            if (totalRotation >= 88.5f)
             {
                 rotatedFlag = true;
                 transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);

@@ -4,15 +4,20 @@ using UnityEngine;
 
 public class TimeWallController : MonoBehaviour
 {
+    public AudioClip timeWallSound;
+    private AudioSource audioSource;
+
     private GameObject pivot; // 壁の基準位置
     private GameObject button;
     private bool pushFlag;
-    Vector3 startPivotPos;
-    Vector3 startButtonPos;
+    private Vector3 startPivotPos;
+    private Vector3 startButtonPos;
 
     // Start is called before the first frame update
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
+
         pivot = transform.Find("TimeWallPivot").gameObject;
         button = transform.Find("TimeWallButton").gameObject;
         pushFlag = false;
@@ -31,6 +36,8 @@ public class TimeWallController : MonoBehaviour
                 button.transform.position = new Vector3(tempPos.x, tempPos.y - Time.deltaTime, tempPos.z);
                 if (startButtonPos.y - button.transform.position.y > 0.2f) // 制限を超えた分戻す
                     button.transform.position = new Vector3(tempPos.x, startButtonPos.y - 0.2f, tempPos.z);
+
+                audioSource.PlayOneShot(timeWallSound);
             }
             if(pivot.transform.position.y - startPivotPos.y < 8.0f) // 壁を上げる位置の制限
             {
