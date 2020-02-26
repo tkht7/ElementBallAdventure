@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class AccelerationPanelController : MonoBehaviour
 {
-    public AudioClip accelSound;
     private AudioSource audioSource;
 
     private float accel;
@@ -17,14 +16,20 @@ public class AccelerationPanelController : MonoBehaviour
         rb = GameObject.Find("Player").GetComponent<Rigidbody>();
     }
 
+    void OnTriggerEnter(Collider collider)
+    {
+        if (collider.gameObject.CompareTag("Player"))
+        {
+            audioSource.Play();
+        }
+    }
+
     void OnTriggerStay(Collider collider)
     {
         if (collider.gameObject.CompareTag("Player"))
         {
             var tempV = rb.velocity;
             rb.velocity = new Vector3(tempV.x, tempV.y, tempV.z + accel); // +Z以外に進むやつがいる時はrotationから向きを求めて作る
-
-            audioSource.PlayOneShot(accelSound);
         }
     }
 }

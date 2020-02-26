@@ -52,7 +52,7 @@ public class Director : SingletonMonoBehaviour<Director>
 
         playerRigidbody = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
-        audioSource.PlayOneShot(titleSound);
+        audioSource.PlayOneShot(titleSound); // スタート画面での音
     }
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)

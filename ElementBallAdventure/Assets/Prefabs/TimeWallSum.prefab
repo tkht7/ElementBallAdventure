@@ -329,7 +329,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f08687de1537aa54eb43a58caf042330, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timeWallSound: {fileID: 8300000, guid: f2408f1d1b9e76843aa279149d496733, type: 3}
 --- !u!54 &922015915995594488
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -356,11 +355,11 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_audioClip: {fileID: 8300000, guid: ea42fa0e68fcef441b2a3d7cb2eb1d74, type: 3}
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
