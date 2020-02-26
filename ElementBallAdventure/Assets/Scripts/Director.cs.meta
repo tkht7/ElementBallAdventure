@@ -3,7 +3,14 @@ guid: fd214a1f7d9cd6d43858f9a355c235f6
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - fadeCanvasPrefab: {fileID: 6208524762347934955, guid: 40a50b5000df5e148be29c6d1a8fd9dd,
+      type: 3}
+  - gameOverCanvasPrefab: {fileID: 9003652745208512357, guid: 400fcc21d2a06154e90de44dc97ba905,
+      type: 3}
+  - titleSound: {instanceID: 0}
+  - decisionSound: {fileID: 8300000, guid: cf6bcc68601eaaf4590ed14619bbc3bc, type: 3}
+  - gameOverSound: {fileID: 8300000, guid: 2573ef568d6ee294884f6cdcc2dbb1c7, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

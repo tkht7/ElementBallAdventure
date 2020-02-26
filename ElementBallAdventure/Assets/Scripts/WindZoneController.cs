@@ -10,8 +10,13 @@ public class WindZoneController : MonoBehaviour
     private float windPersistence;
     private float windPower;
 
+    public AudioClip windZoneSound;
+    AudioSource audioSource;
+
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
+
         startPos = transform.position;
         windSpeed = -40.0f;
         windPersistence = 86.0f;
@@ -34,6 +39,7 @@ public class WindZoneController : MonoBehaviour
         {
             var rb = collider.gameObject.GetComponent<Rigidbody>();
             rb.AddForce(Vector3.back * windPower * Time.deltaTime);
+            audioSource.PlayOneShot(windZoneSound);
         }
     }
 }
