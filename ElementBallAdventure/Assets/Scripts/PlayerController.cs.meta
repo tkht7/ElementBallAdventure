@@ -3,7 +3,11 @@ guid: e50ebff908c84df43b86d4c1832913c0
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - rushSound: {fileID: 8300000, guid: 3dbd98e843c63a344a3c92a4b6bab819, type: 3}
+  - flameSound: {fileID: 8300000, guid: bfef9a82a58315b4f8f095f3a35c31b0, type: 3}
+  - iceSound: {fileID: 8300000, guid: a9fc4b564533f30499516866fcf3fb0a, type: 3}
+  - itemGetSound: {fileID: 8300000, guid: b5be00be5109f174c8d688cc4e825dde, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
