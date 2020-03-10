@@ -8,7 +8,7 @@ MonoImporter:
       type: 3}
   - gameOverCanvasPrefab: {fileID: 9003652745208512357, guid: 400fcc21d2a06154e90de44dc97ba905,
       type: 3}
-  - titleSound: {instanceID: 0}
+  - titleSound: {fileID: 8300000, guid: 1ada47d4ee13d174aac40bb6c635f340, type: 3}
   - decisionSound: {fileID: 8300000, guid: cf6bcc68601eaaf4590ed14619bbc3bc, type: 3}
   - gameOverSound: {fileID: 8300000, guid: 2573ef568d6ee294884f6cdcc2dbb1c7, type: 3}
   executionOrder: 0
