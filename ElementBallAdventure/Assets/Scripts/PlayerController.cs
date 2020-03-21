@@ -5,8 +5,10 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    public float speed;
-    public float jumpSpeed;
+    public float playerMoveForce;
+    public float[] initialPlayerJumpSpeed;
+    public float playerGravity;
+    public float playerGravityFall;
     public float rushSpeed;
     public float flameJumpSpeed;
     public Material[] _material;
@@ -17,7 +19,12 @@ public class PlayerController : MonoBehaviour
     public AudioClip itemGetSound;
     private AudioSource audioSource;
 
-    private int Element; // 0:Normal, 1:Rush, 2:Flame, 3:Ice
+    private int playerElement;
+    private const int normalElement = 0;
+    private const int rushElement = 1;
+    private const int flameElement = 2;
+    private const int iceElement = 3;
+
     private Image gageImage;
     private Rigidbody rb;
     private ParticleSystem ps;
@@ -28,17 +35,36 @@ public class PlayerController : MonoBehaviour
     private BoxCollider shellCollider2;
 
     private bool onGround;
+    private Vector3 movement;
     private float moveDecayRate;
+    private float playerSpeed;
+    private const float slowSpeed = 5.0f;
+    private const float highSpeed = 15.0f;
+
+    private float playerJumpSpeed;
+    private bool useGravity;
+    private float localGravity;
     public bool rushFlag;
     private float rushCount;
+    private const float rushNoGravityTime = 0.25f;
+    private const float rushStateTime = 1.2f;
+
     private Slider elementGage;
     private float gage;
-    private bool useIceStart;
+    private const float fullGage = 1.0f;
+
     private bool useIce;
-    private bool iceFlag;
+    private bool iceSticking;
     private float iceCount;
+    private const float iceStickingAcceptTime = 0.1f;
+
     private GameObject frozenObject;
     private Vector3 FrozenPos;
+
+    private const float rushGageRecoverSpeed = 0.25f;
+    private const float flameGageRecoverSpeed = 1.0f;
+    private const float iceGageRecoverSpeed = 0.25f;
+    private const float iceGageUseSpeed = 0.05f;
 
     // カメラ位置・角度
     private GameObject playerPos;
@@ -47,7 +73,6 @@ public class PlayerController : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
 
-        // Rigidbody取得
         rb = GetComponent<Rigidbody>();
         ps = GetComponent<ParticleSystem>();
         psColor = GetComponent<ParticleSystem>().main;
@@ -65,68 +90,297 @@ public class PlayerController : MonoBehaviour
         
         onGround = false;
         moveDecayRate = 1.0f;
+        playerJumpSpeed = 0.0f;
+        useGravity = true;
+        localGravity = playerGravity;
         rushCount = 0.0f;
         gage = 0.0f;
         rushFlag = false;
-        Element = 0;
-        useIceStart = false;
+        playerElement = normalElement;
         useIce = false;
-        iceFlag = false;
+        iceSticking = false;
         iceCount = 0.0f;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (onGround)
-            moveDecayRate = 1.0f;
-        else
-            moveDecayRate = 0.5f; // ジャンプ中は移動量減少
+        // 移動量の調整
+        SetMoveDecayRate();
 
         // 移動
-        var moveHorizontal = Input.GetAxis("Horizontal");
-        var moveVertical = Input.GetAxis("Vertical");
-        var movement = new Vector3(moveHorizontal * Mathf.Cos(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate
+        playerMoveProcess();
+
+        // ジャンプの準備
+        if(onGround) playerJumpPrepare();
+
+        // ジャンプ
+        playerJumpProcess();
+
+        // 各属性のアクション
+        ElementAction();
+
+
+
+        // スピードテスト
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            Vector3 testSpeed = new Vector3(0, 0, 50.0f);
+            rb.velocity = testSpeed;
+        }
+        Debug.Log(rb.velocity);
+
+
+        //Debug.Log(Time.deltaTime);
+    }
+
+    private void FixedUpdate()
+    {
+        // 重力をAddForceでかけるメソッドを呼ぶ。
+        if(useGravity)
+            SetLocalGravity(localGravity); 
+    }
+
+    // プレイヤーに重力をかける
+    private void SetLocalGravity(float gravity)
+    {
+        rb.AddForce(new Vector3(0.0f, gravity, 0.0f), ForceMode.Acceleration);
+    }
+
+    void SetMoveDecayRate()
+    {
+        if (onGround) moveDecayRate = 1.0f;
+        else          moveDecayRate = 0.5f; // ジャンプ中は移動量減少
+    }
+
+    // 移動
+    void playerMoveProcess()
+    {
+        var moveHorizontal = 0.0f;
+        var moveVertical = 0.0f;
+
+        // 前後左右の移動方向を決める。対になるボタンの同時押しでは何も起こらない。
+        if (Input.GetKey(KeyCode.RightArrow)) moveHorizontal += 1.0f;
+        if (Input.GetKey(KeyCode.LeftArrow))  moveHorizontal -= 1.0f;
+        if (Input.GetKey(KeyCode.UpArrow))    moveVertical += 1.0f;
+        if (Input.GetKey(KeyCode.DownArrow))  moveVertical -= 1.0f;
+
+        // カメラの向きに合わせて移動方向を変更
+        movement = new Vector3(moveHorizontal * Mathf.Cos(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate
                                     + moveVertical * Mathf.Sin(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate,
                                     0.0f,
                                     moveVertical * Mathf.Cos(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate
                                     - moveHorizontal * Mathf.Sin(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate);
         if (!useIce)
-            rb.AddForce(movement * speed * Time.deltaTime);
+            rb.AddForce(movement * playerMoveForce * Time.deltaTime);
+    }
 
+    // ジャンプの準備
+    void playerJumpPrepare()
+    {
+        localGravity = playerGravity;
+        playerSpeed = rb.velocity.x * rb.velocity.x + rb.velocity.z * rb.velocity.z;
+        if (playerSpeed < slowSpeed * slowSpeed)
+        {
+            playerJumpSpeed = initialPlayerJumpSpeed[0];
+        }
+        else if (playerSpeed < highSpeed * highSpeed)
+        {
+            playerJumpSpeed = initialPlayerJumpSpeed[1];
+        }
+        else
+        {
+            playerJumpSpeed = initialPlayerJumpSpeed[2];
+        }
+    }
 
-        // ジャンプ
+    // ジャンプ
+    void playerJumpProcess()
+    {
         if (Input.GetKeyDown(KeyCode.Z) && onGround && !useIce)
         {
             onGround = false;
-            var jumpUp = new Vector3(rb.velocity.x, jumpSpeed, rb.velocity.z);
-            rb.velocity = jumpUp;
+            rb.velocity = new Vector3(rb.velocity.x, playerJumpSpeed, rb.velocity.z);
         }
-
-        if (Element == 1)
+        // ボタンを離すか，降下中は重力を強くする
+        else if (Input.GetKeyUp(KeyCode.Z) || rb.velocity.y < 0.0f)
         {
-            Rush(movement);
+            localGravity = playerGravityFall;
         }
-        else if (Element == 2)
+    }
+
+    // 各属性のアクション
+    void ElementAction()
+    {
+        if (playerElement == rushElement)
         {
-            Flame();
+            RushAction();
         }
-        else if (Element == 3)
+        else if (playerElement == flameElement)
         {
-            Ice();
+            FlameAction();
         }
+        else if (playerElement == iceElement)
+        {
+            IceAction();
+        }
+    }
 
+    
 
-        // スピードテスト
-        //if (Input.GetKeyDown(KeyCode.Q))
-        //{
-        //    Vector3 testSpeed = new Vector3(0, 0, 50.0f);
-        //    rb.velocity = testSpeed;
-        //}
-        //Debug.Log(rb.velocity);
+    void RushAction()
+    {
+        if (Input.GetKeyDown(KeyCode.X) && gage == fullGage)
+        {
+            var rushDirection = movement.normalized;
+            if (rushDirection != Vector3.zero)
+            {
+                // 突進から一定時間は重力の影響を受けない
+                useGravity = false;
 
+                rb.velocity = new Vector3(rb.velocity.x, 0.0f, rb.velocity.z);
+                rb.AddForce(rushDirection * rushSpeed);
+                var rushRotation = new Vector3(rushDirection.z, 0.0f, -rushDirection.x);
+                rb.AddTorque(rushRotation * Mathf.PI * rushSpeed, ForceMode.Acceleration);
+
+                // ゲージを一気に消費
+                gage = 0.0f;
+
+                // 突進を使ってからの時間計測用
+                rushCount = 0.0f;
+
+                // 一定時間，突進を使ってることのフラグを立てる
+                rushFlag = true;
+
+                // 効果音
+                audioSource.PlayOneShot(rushSound);
+
+                // エフェクト
+                ps.Play();
+            }
+        }
         
-        //Debug.Log(Time.deltaTime);
+        if (rushCount >= rushNoGravityTime) useGravity = true;
+        if (rushCount >= rushStateTime) rushFlag = false;
+
+        // 突進を使ってからの時間を計測
+        if (rushFlag) rushCount += Time.deltaTime;
+
+        // 時間経過でゲージ回復
+        GageRecover(rushGageRecoverSpeed);
+    }
+
+    void FlameAction()
+    {
+        if (Input.GetKeyDown(KeyCode.X) && gage == fullGage)
+        {
+            rb.velocity = new Vector3(rb.velocity.x, flameJumpSpeed, rb.velocity.z);
+            gage = 0.0f;
+            localGravity = playerGravity;
+
+            // 効果音
+            audioSource.PlayOneShot(flameSound);
+
+            // エフェクト
+            ps.Play();
+        }
+        // 地上にいるときゲージ回復
+        if (onGround) GageRecover(flameGageRecoverSpeed);
+    }
+
+    void IceAction()
+    {
+        // 自身の回りに氷を張る
+        if (Input.GetKeyDown(KeyCode.X) && gage > 0.0f)
+            CreateIce();
+
+        // 氷を張っているときの処理
+        if (useIce)
+            UseIceProcess();
+
+        // 張り付き解除
+        if (Input.GetKeyUp(KeyCode.X) || gage <= 0.0f)
+            IceStickingCancel();
+
+
+        // 何かに張り付いているときの処理
+        if (iceSticking)
+        {
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+
+            // 張り付いた時，その物体と一緒に動く
+            IceStickingMove();
+        }
+
+        // 地上にいるときゲージ回復
+        if (onGround && !useIce)
+            GageRecover(iceGageRecoverSpeed);
+    }
+
+    // 自身の回りに氷を張る
+    void CreateIce()
+    {
+        shell1.SetActive(true);
+        shell2.SetActive(true);
+
+        useIce = true;
+
+        // 効果音
+        audioSource.PlayOneShot(iceSound);
+
+        // エフェクト　ないほうが良いかも
+        //ps.Play();
+    }
+
+    // 氷を張っているときの処理
+    void UseIceProcess()
+    {
+        // 氷を張った瞬間(iceStickingAcceptTime以内)に物体に触れてなかったら張り付けない
+        if (!iceSticking && iceCount >= iceStickingAcceptTime)
+        {
+            shellCollider1.isTrigger = false;
+            shellCollider2.isTrigger = false;
+        }
+        // 氷を張ってからの時間を計測
+        iceCount += Time.deltaTime;
+
+        gage -= iceGageUseSpeed * Time.deltaTime;
+    }
+
+    // 張り付き解除
+    void IceStickingCancel()
+    {
+        useIce = false;
+        iceSticking = false;
+        shellCollider1.isTrigger = true;
+        shellCollider2.isTrigger = true;
+        useGravity = true;
+        shell1.SetActive(false);
+        shell2.SetActive(false);
+        iceCount = 0.0f;
+    }
+
+    // 張り付いた物体と一緒に動く
+    void IceStickingMove()
+    {
+        var preFrozenPos = FrozenPos;
+        FrozenPos = frozenObject.transform.position;
+        rb.position = new Vector3(rb.position.x + (FrozenPos.x - preFrozenPos.x),
+                                  rb.position.y + (FrozenPos.y - preFrozenPos.y),
+                                  rb.position.z + (FrozenPos.z - preFrozenPos.z));
+    }
+
+    // ゲージ回復 (回復の早さ)
+    void GageRecover(float recoverSpeed)
+    {
+        if (gage < fullGage)
+        {
+            gage += recoverSpeed * Time.deltaTime;
+            if (gage > fullGage)
+                gage = fullGage;
+        }
+        elementGage.value = gage;
     }
 
     void OnCollisionStay(Collision collision)
@@ -143,187 +397,42 @@ public class PlayerController : MonoBehaviour
 
     void OnTriggerEnter(Collider collider)
     {
-        if (collider.gameObject.CompareTag("Rush"))
-        {
-            this.GetComponent<Renderer>().material = _material[1];
-            Element = 1;
-            gage = 1.0f;
-            gageImage.color = Color.yellow;
-            psColor.startColor = Color.yellow;
-            audioSource.PlayOneShot(itemGetSound);
-        }
-        else if (collider.gameObject.CompareTag("Flame"))
-        {
-            this.GetComponent<Renderer>().material = _material[2];
-            Element = 2;
-            gage = 1.0f;
-            gageImage.color = Color.red;
-            psColor.startColor = Color.red;
-            audioSource.PlayOneShot(itemGetSound);
-        }
-        else if (collider.gameObject.CompareTag("Ice"))
-        {
-            this.GetComponent<Renderer>().material = _material[3];
-            Element = 3;
-            gage = 1.0f;
-            gageImage.color = Color.cyan;
-            psColor.startColor = Color.cyan;
-            audioSource.PlayOneShot(itemGetSound);
-        }
+        // 各属性へ変身
+        if (collider.gameObject.CompareTag("Rush"))       ChangeElement(rushElement, Color.yellow, Color.yellow);
+        else if (collider.gameObject.CompareTag("Flame")) ChangeElement(flameElement, Color.red, Color.red);
+        else if (collider.gameObject.CompareTag("Ice"))   ChangeElement(iceElement, Color.cyan, Color.cyan);
 
-        if (useIceStart && !collider.gameObject.CompareTag("WindZone"))
-        {
-            iceFlag = true;
-            rb.isKinematic = true;
-            frozenObject = collider.gameObject;
-            FrozenPos = frozenObject.transform.position;
-        }
-
+        // 張り付けるかどうかの判定 (触れている物体が透過する場合は張り付かない)
+        if (useIce && iceCount < iceStickingAcceptTime && !collider.isTrigger)
+            ApplyIceSticking(collider);
     }
 
-    void Rush(Vector3 movement)
+    void OnTriggerExit(Collider collider)
     {
-        // 突進
-        if (Input.GetKeyDown(KeyCode.X) && gage == 1.0f)
-        {
-            var rushDirection = movement.normalized;
-            if (rushDirection != Vector3.zero)
-            {
-                rb.useGravity = false;
-                rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
-                rb.AddForce(rushDirection * rushSpeed);
-                var rushRotation = new Vector3(rushDirection.z, 0, -rushDirection.x);
-                rb.AddTorque(rushRotation * Mathf.PI * rushSpeed, ForceMode.Acceleration);
-
-                gage = 0.0f;
-                rushFlag = true;
-
-                // 効果音
-                audioSource.PlayOneShot(rushSound);
-
-                // エフェクト
-                ps.Play();
-            }
-        }
-
-        // 突進から一定時間は重力の影響を受けない
-        if (rushCount >= 0.25f)
-        {
-            rb.useGravity = true;
-        }
-
-        // 突進から一定時間，突進を使ってることのフラグを立てる
-        if (rushCount >= 1.2f)
-        {
-            rushFlag = false;
-            rushCount = 0.0f;
-        }
-
-        if (rushFlag)
-        {
-            rushCount += Time.deltaTime;
-        }
-
-        // 時間経過でゲージの回復
-        if (gage < 1.0f)
-        {
-            gage += Time.deltaTime * 0.25f;
-            if (gage > 1.0f)
-                gage = 1.0f;
-        }
-        elementGage.value = gage;
+        // 張り付いてる物体から引き剥がされたら，張り付き解除
+        if (iceSticking && collider.gameObject == frozenObject)
+            IceStickingCancel();
     }
 
-    void Flame()
+    // 各属性へ変身
+    void ChangeElement(int element, UnityEngine.Color gageColor, UnityEngine.Color effectColor)
     {
-        // 大ジャンプ
-        if (Input.GetKeyDown(KeyCode.X) && gage == 1.0f)
-        {
-            rb.velocity = new Vector3(rb.velocity.x, flameJumpSpeed, rb.velocity.z);
-
-            gage = 0.0f;
-
-            // 効果音
-            audioSource.PlayOneShot(flameSound);
-
-            // エフェクト
-            ps.Play();
-
-        }
-
-        // 地上で時間経過でゲージの回復
-        if (gage < 1.0f && onGround)
-        {
-            gage += Time.deltaTime;
-            if (gage > 1.0f)
-                gage = 1.0f;
-        }
-        elementGage.value = gage;
+        this.GetComponent<Renderer>().material = _material[element];
+        playerElement = element;
+        gage = fullGage;
+        gageImage.color = gageColor;
+        psColor.startColor = effectColor;
+        audioSource.PlayOneShot(itemGetSound);
     }
 
-    void Ice()
+    // 張り付き状態にする
+    void ApplyIceSticking(Collider collider)
     {
-        // 自身の回りに氷を張る
-        if (Input.GetKeyDown(KeyCode.X) && gage > 0.0f)
-        {
-            shell1.SetActive(true);
-            shell2.SetActive(true);
-
-            useIceStart = true;
-            useIce = true;
-
-            // 効果音
-            audioSource.PlayOneShot(iceSound);
-
-            // エフェクト いらないかも
-            //ps.Play();
-
-        }
-        // 氷を張った瞬間(iceCount0.1f以内)に物体に触れてなかったら張り付けない
-        else if (Input.GetKey(KeyCode.X) && gage > 0.0f && shell1.activeSelf)
-        {
-            iceCount += Time.deltaTime;
-            if (!iceFlag && useIceStart && iceCount >= 0.1f)
-            {
-                shellCollider1.isTrigger = false;
-                shellCollider2.isTrigger = false;
-                useIceStart = false;
-            }
-            gage -= Time.deltaTime * 0.05f;
-
-        }
-
-        // 張り付き解除
-        if (Input.GetKeyUp(KeyCode.X) || gage <= 0.0f)
-        {
-            useIceStart = false;
-            useIce = false;
-            iceFlag = false;
-            shellCollider1.isTrigger = true;
-            shellCollider2.isTrigger = true;
-            rb.isKinematic = false;
-            shell1.SetActive(false);
-            shell2.SetActive(false);
-            iceCount = 0.0f;
-        }
-
-        // 張り付いた時，その物体と一緒に動く
-        if (iceFlag)
-        {
-            var preFrozenPos = FrozenPos;
-            FrozenPos = frozenObject.transform.position;
-            rb.position = new Vector3(rb.position.x + (FrozenPos.x - preFrozenPos.x),
-                                      rb.position.y + (FrozenPos.y - preFrozenPos.y),
-                                      rb.position.z + (FrozenPos.z - preFrozenPos.z));
-        }
-
-        // 地上で時間経過でゲージの回復
-        if (gage < 1.0f && onGround && !useIce)
-        {
-            gage += Time.deltaTime * 0.25f;
-            if (gage > 1.0f)
-                gage = 1.0f;
-        }
-        elementGage.value = gage;
+        iceSticking = true;
+        useGravity = false;
+        rb.velocity = Vector3.zero;
+        rb.rotation = Quaternion.Euler(Vector3.zero);
+        frozenObject = collider.gameObject;
+        FrozenPos = frozenObject.transform.position;
     }
 }

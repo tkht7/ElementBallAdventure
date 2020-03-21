@@ -5688,6 +5688,11 @@ PrefabInstance:
       propertyPath: goalText
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 4664801347402553324, guid: dfb735a5e4eab55498cd9bd9dee63b93,
+        type: 3}
+      propertyPath: maxPlayerFallSpeed
+      value: -20
+      objectReference: {fileID: 0}
     - target: {fileID: 4664801347402553325, guid: dfb735a5e4eab55498cd9bd9dee63b93,
         type: 3}
       propertyPath: m_LocalPosition.x

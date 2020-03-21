@@ -11,7 +11,8 @@ public class CameraController : MonoBehaviour
 
     //private Vector3 offset; // 球からカメラまでの距離
     private Quaternion startAngle;
-    
+
+    private const float cameraRotationSpeed = 60.0f;
     
     void Start()
     {
@@ -24,13 +25,13 @@ public class CameraController : MonoBehaviour
     
     void Update()
     {
-        if (Input.GetKey(KeyCode.F))
+        if (Input.GetKey(KeyCode.A))
         {
-            transform.Rotate(0.0f, -60.0f * Time.deltaTime, 0.0f);
+            transform.Rotate(0.0f, -cameraRotationSpeed * Time.deltaTime, 0.0f);
         }
-        if (Input.GetKey(KeyCode.H))
+        if (Input.GetKey(KeyCode.D))
         {
-             transform.Rotate(0.0f, 60.0f * Time.deltaTime, 0.0f);
+             transform.Rotate(0.0f, cameraRotationSpeed * Time.deltaTime, 0.0f);
         }
         transform.position = player.transform.position;
 
