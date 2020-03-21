@@ -7,6 +7,7 @@ public class GameOver : MonoBehaviour
     private Director director;
     private GameObject player;
     private bool calledFlag = false;
+    private const float gameOverHeight = -80.0f;
 
     void Start()
     {
@@ -16,7 +17,7 @@ public class GameOver : MonoBehaviour
     
     void Update()
     {
-        if(player.transform.position.y <= -100.0f && !calledFlag)
+        if(player.transform.position.y <= gameOverHeight && !calledFlag)
         {
             calledFlag = true;
             director.GameOver();

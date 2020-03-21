@@ -78,13 +78,6 @@ public class Director : SingletonMonoBehaviour<Director>
             currentStageNum = 0;
             MoveToStage(currentStageNum);
         }
-
-        // クリア画面へ(チェック用)
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            currentStageNum = stageName.Length - 1;
-            MoveToStage(currentStageNum);
-        }
     }
 
     //次のステージに進む処理
@@ -186,7 +179,6 @@ public class Director : SingletonMonoBehaviour<Director>
 
     public void SelectSelf(Button button)
     {
-        //EventSystem.current.SetSelectedGameObject(gameObject);
         button.Select();
     }
 
