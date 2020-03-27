@@ -75,7 +75,7 @@ MonoBehaviour:
   m_MinSize: {x: 434, y: 271}
   m_MaxSize: {x: 14004, y: 10021}
   vertical: 0
-  controlID: 163
+  controlID: 86
 --- !u!114 &4
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -126,7 +126,7 @@ MonoBehaviour:
   m_MinSize: {x: 201, y: 442}
   m_MaxSize: {x: 4001, y: 8042}
   vertical: 1
-  controlID: 123
+  controlID: 15
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -178,7 +178,7 @@ MonoBehaviour:
   m_MinSize: {x: 911, y: 442}
   m_MaxSize: {x: 22006, y: 10021}
   vertical: 0
-  controlID: 197
+  controlID: 41
 --- !u!114 &8
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -349,7 +349,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 203c0000
     m_LastClickedID: 15392
-    m_ExpandedIDs: 000000003c3900003e39000040390000423900004439000046390000483900004a3900004c3900004e3900005039000052390000
+    m_ExpandedIDs: 00000000243a0000263a0000283a00002a3a00002c3a00002e3a0000303a0000323a0000343a0000363a0000383a00003a3a00003c3a00003e3a0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -377,21 +377,21 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 275}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: ffffffff000000003c3900003e39000040390000423900004439000046390000483900004a3900004c3900004e39000050390000523900007a3900007e390000
+    m_ExpandedIDs: ffffffff00000000243a0000263a0000283a00002a3a00002c3a00002e3a0000303a0000323a0000343a0000363a0000383a00003a3a00003c3a00003e3a0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: GameOver
-      m_OriginalName: GameOver
+      m_Name: 
+      m_OriginalName: 
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 11338
+      m_UserData: 0
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 0
+      m_OriginalEventType: 11
       m_IsRenamingFilename: 1
       m_ClientGUIView: {fileID: 2}
     m_SearchString: 
@@ -470,7 +470,7 @@ MonoBehaviour:
     m_PrefName: Preview_InspectorPreview
   m_PreviewWindow: {fileID: 0}
   m_LastInspectedObjectInstanceID: -1
-  m_LastVerticalScrollValue: 632
+  m_LastVerticalScrollValue: 0
 --- !u!114 &15
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -502,7 +502,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: c689ffff6e8fffff8ab7ffff04beffff70fbffff
+      m_ExpandedIDs: 70fbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -564,7 +564,7 @@ MonoBehaviour:
   m_Position:
     m_Target: {x: 168, y: 40, z: 45}
     speed: 2
-    m_Value: {x: 370.625, y: 210, z: 0}
+    m_Value: {x: 168, y: 40, z: 45}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -612,11 +612,11 @@ MonoBehaviour:
   m_Rotation:
     m_Target: {x: 0.21208335, y: -0.18027496, z: 0.039837882, w: 0.95967865}
     speed: 2
-    m_Value: {x: 0.23225439, y: 0.6501265, z: -0.21898486, w: 0.6895209}
+    m_Value: {x: 0.2120782, y: -0.18027058, z: 0.039836913, w: 0.9596553}
   m_Size:
     m_Target: 82.5
     speed: 2
-    m_Value: 1405.7493
+    m_Value: 82.5
   m_Ortho:
     m_Target: 0
     speed: 2
