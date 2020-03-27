@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
@@ -7,9 +8,6 @@ public class CameraController : MonoBehaviour
     public GameObject player; // 球のオブジェクト
 
     private GameObject mainCamera;
-    private GameObject subCamera;
-
-    //private Vector3 offset; // 球からカメラまでの距離
     private Quaternion startAngle;
 
     private const float cameraRotationSpeed = 60.0f;
@@ -17,36 +15,44 @@ public class CameraController : MonoBehaviour
     void Start()
     {
         mainCamera = transform.Find("Main Camera").gameObject;
-        subCamera = transform.Find("Sub Camera").gameObject;
         transform.position = player.transform.position;
-        //offset = mainCamera.transform.position - transform.position;
         startAngle = mainCamera.transform.rotation;
     }
     
     void Update()
     {
-        if (Input.GetKey(KeyCode.A))
+        // カメラ位置を45度おきの一番近いところに揃える
+        if (Input.GetKeyDown(KeyCode.S))
         {
-            transform.Rotate(0.0f, -cameraRotationSpeed * Time.deltaTime, 0.0f);
+            Vector3 angle = transform.localEulerAngles;
+            float angleY = (float)Math.Floor((angle.y + 22.5f) % 360.0f / 45.0f) * 45.0f;
+            transform.rotation = Quaternion.Euler(new Vector3(angle.x, angleY, angle.z));
         }
-        if (Input.GetKey(KeyCode.D))
+
+        // カメラを45度おきに回転させる
+        if (Input.GetKey(KeyCode.S))
         {
-             transform.Rotate(0.0f, cameraRotationSpeed * Time.deltaTime, 0.0f);
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                transform.Rotate(0.0f, -45.0f, 0.0f);
+            }
+            if (Input.GetKeyDown(KeyCode.D))
+            {
+                transform.Rotate(0.0f, 45.0f, 0.0f);
+            }
+        }
+        // カメラを回転させる
+        else
+        {
+            if (Input.GetKey(KeyCode.A))
+            {
+                transform.Rotate(0.0f, -cameraRotationSpeed * Time.deltaTime, 0.0f);
+            }
+            if (Input.GetKey(KeyCode.D))
+            {
+                transform.Rotate(0.0f, cameraRotationSpeed * Time.deltaTime, 0.0f);
+            }
         }
         transform.position = player.transform.position;
-
-        // 初期のカメラ位置に戻す
-        if (Input.GetKeyDown(KeyCode.N))
-        {
-            transform.rotation = Quaternion.Euler(Vector3.zero);
-            mainCamera.transform.rotation = startAngle;
-        }
-
-        // カメラ切り替え
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            mainCamera.SetActive(!mainCamera.activeSelf);
-            subCamera.SetActive(!subCamera.activeSelf);
-        }
     }
 }

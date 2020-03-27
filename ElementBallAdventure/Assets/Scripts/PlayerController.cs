@@ -37,9 +37,17 @@ public class PlayerController : MonoBehaviour
     private bool onGround;
     private Vector3 movement;
     private float moveDecayRate;
+    private const float groundMoveDecayRate = 1.0f;
+    private const float jumpMoveDecayRate = 0.5f;
+
     private float playerSpeed;
     private const float slowSpeed = 5.0f;
     private const float highSpeed = 15.0f;
+
+    private int jumpState;
+    private const int notJump = 0;
+    private const int normalJump = 1;
+    private const int flameJump = 2;
 
     private float playerJumpSpeed;
     private bool useGravity;
@@ -67,7 +75,7 @@ public class PlayerController : MonoBehaviour
     private const float iceGageUseSpeed = 0.05f;
 
     // カメラ位置・角度
-    private GameObject playerPos;
+    private GameObject cameraRelation;
     
     void Start()
     {
@@ -79,7 +87,7 @@ public class PlayerController : MonoBehaviour
 
         elementGage = GameObject.Find("AttackGage").GetComponent<Slider>();
         gageImage = GameObject.Find("Fill").GetComponent<Image>();
-        playerPos = GameObject.Find("PlayerPos").gameObject;
+        cameraRelation = GameObject.Find("CameraRelation").gameObject;
 
         shell1 = transform.Find("IceShell1").gameObject;
         shell2 = transform.Find("IceShell2").gameObject;
@@ -89,8 +97,9 @@ public class PlayerController : MonoBehaviour
         rb.maxAngularVelocity = 100; // 最大回転速度の上限を上げる
         
         onGround = false;
-        moveDecayRate = 1.0f;
+        moveDecayRate = groundMoveDecayRate;
         playerJumpSpeed = 0.0f;
+        jumpState = notJump;
         useGravity = true;
         localGravity = playerGravity;
         rushCount = 0.0f;
@@ -123,12 +132,12 @@ public class PlayerController : MonoBehaviour
 
 
         // スピードテスト
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            Vector3 testSpeed = new Vector3(0, 0, 50.0f);
-            rb.velocity = testSpeed;
-        }
-        Debug.Log(rb.velocity);
+        //if (Input.GetKeyDown(KeyCode.Q))
+        //{
+        //    Vector3 testSpeed = new Vector3(0, 0, 50.0f);
+        //    rb.velocity = testSpeed;
+        //}
+        //Debug.Log(rb.velocity);
 
 
         //Debug.Log(Time.deltaTime);
@@ -147,6 +156,7 @@ public class PlayerController : MonoBehaviour
         rb.AddForce(new Vector3(0.0f, gravity, 0.0f), ForceMode.Acceleration);
     }
 
+    // 移動量の係数
     void SetMoveDecayRate()
     {
         if (onGround) moveDecayRate = 1.0f;
@@ -166,11 +176,11 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.DownArrow))  moveVertical -= 1.0f;
 
         // カメラの向きに合わせて移動方向を変更
-        movement = new Vector3(moveHorizontal * Mathf.Cos(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate
-                                    + moveVertical * Mathf.Sin(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate,
+        movement = new Vector3(moveHorizontal * Mathf.Cos(cameraRelation.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate
+                                    + moveVertical * Mathf.Sin(cameraRelation.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate,
                                     0.0f,
-                                    moveVertical * Mathf.Cos(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate
-                                    - moveHorizontal * Mathf.Sin(playerPos.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate);
+                                    moveVertical * Mathf.Cos(cameraRelation.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate
+                                    - moveHorizontal * Mathf.Sin(cameraRelation.transform.localEulerAngles.y * Mathf.PI / 180.0f) * moveDecayRate);
         if (!useIce)
             rb.AddForce(movement * playerMoveForce * Time.deltaTime);
     }
@@ -200,10 +210,11 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Z) && onGround && !useIce)
         {
             onGround = false;
+            jumpState = normalJump;
             rb.velocity = new Vector3(rb.velocity.x, playerJumpSpeed, rb.velocity.z);
         }
-        // ボタンを離すか，降下中は重力を強くする
-        else if (Input.GetKeyUp(KeyCode.Z) || rb.velocity.y < 0.0f)
+        // 普通のジャンプ中にボタンを離すか，降下中は重力を強くする
+        else if (jumpState == normalJump && Input.GetKeyUp(KeyCode.Z) || rb.velocity.y < 0.0f)
         {
             localGravity = playerGravityFall;
         }
@@ -268,12 +279,14 @@ public class PlayerController : MonoBehaviour
 
         // 時間経過でゲージ回復
         GageRecover(rushGageRecoverSpeed);
+        elementGage.value = gage;
     }
 
     void FlameAction()
     {
         if (Input.GetKeyDown(KeyCode.X) && gage == fullGage)
         {
+            jumpState = flameJump;
             rb.velocity = new Vector3(rb.velocity.x, flameJumpSpeed, rb.velocity.z);
             gage = 0.0f;
             localGravity = playerGravity;
@@ -286,6 +299,7 @@ public class PlayerController : MonoBehaviour
         }
         // 地上にいるときゲージ回復
         if (onGround) GageRecover(flameGageRecoverSpeed);
+        elementGage.value = gage;
     }
 
     void IceAction()
@@ -316,6 +330,7 @@ public class PlayerController : MonoBehaviour
         // 地上にいるときゲージ回復
         if (onGround && !useIce)
             GageRecover(iceGageRecoverSpeed);
+        elementGage.value = gage;
     }
 
     // 自身の回りに氷を張る
@@ -380,7 +395,6 @@ public class PlayerController : MonoBehaviour
             if (gage > fullGage)
                 gage = fullGage;
         }
-        elementGage.value = gage;
     }
 
     void OnCollisionStay(Collision collision)

@@ -199,7 +199,7 @@ GameObject:
   - component: {fileID: 922015915685867903}
   - component: {fileID: 922015915685867902}
   - component: {fileID: 922015915685867901}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: TimeWallNumber1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -450,7 +450,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 922015916612337146}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: TimeWallPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -486,7 +486,7 @@ GameObject:
   - component: {fileID: 922015916632376413}
   - component: {fileID: 922015916632376412}
   - component: {fileID: 922015916632376411}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: TimeWallNumber2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -580,7 +580,7 @@ GameObject:
   - component: {fileID: 922015916905409436}
   - component: {fileID: 922015916905409435}
   - component: {fileID: 922015916905409434}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: TimeWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}

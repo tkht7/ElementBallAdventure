@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5663848196299142360}
   - component: {fileID: 308332033009605339}
   - component: {fileID: 3085676942434133026}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: MoveFloorWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -107,7 +107,7 @@ GameObject:
   - component: {fileID: 6676816646956504961}
   - component: {fileID: 1471742230836005690}
   - component: {fileID: 9210930940536746311}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: MoveFloor
   m_TagString: Ground
   m_Icon: {fileID: 0}

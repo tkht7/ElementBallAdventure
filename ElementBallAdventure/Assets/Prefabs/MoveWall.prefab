@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5474046191551762422}
   - component: {fileID: 1210561843834451391}
   - component: {fileID: 4478094364519358804}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: AboveWall
   m_TagString: Ground
   m_Icon: {fileID: 0}
@@ -108,7 +108,7 @@ GameObject:
   - component: {fileID: 3847634301471968728}
   - component: {fileID: 3847634301471968729}
   - component: {fileID: 3847634301471968730}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: MoveWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
