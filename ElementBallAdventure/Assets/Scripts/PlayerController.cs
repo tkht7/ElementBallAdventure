@@ -64,7 +64,7 @@ public class PlayerController : MonoBehaviour
     private bool useIce;
     private bool iceSticking;
     private float iceCount;
-    private const float iceStickingAcceptTime = 0.1f;
+    private const float iceStickingAcceptTime = 0.2f;
 
     private GameObject frozenObject;
     private Vector3 FrozenPos;
