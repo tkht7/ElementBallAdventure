@@ -28,9 +28,13 @@ public class Director : SingletonMonoBehaviour<Director>
     private GameObject fadeCanvasClone;
     private FadeCanvas fadeCanvas;
     private GameObject gameOverCanvasClone;
+    private GameObject middlePoint;
+    private GameObject player;
     private Rigidbody playerRigidbody;
     private Button[] buttons;
     private EventTrigger[] eventTriggers;
+
+    private bool middleResumeFlag;
 
     public void Awake()
     {
@@ -50,14 +54,19 @@ public class Director : SingletonMonoBehaviour<Director>
         //デリゲートの登録
         SceneManager.sceneLoaded += OnSceneLoaded;
 
+        middlePoint = GameObject.Find("MiddlePoint");
+        player = GameObject.FindGameObjectWithTag("Player").gameObject;
         playerRigidbody = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
         audioSource.PlayOneShot(titleSound); // スタート画面での音
+        middleResumeFlag = false;
     }
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         //改めて取得
+        middlePoint = GameObject.Find("MiddlePoint");
+        player = GameObject.FindGameObjectWithTag("Player");
         playerRigidbody = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
     }
 
@@ -83,6 +92,7 @@ public class Director : SingletonMonoBehaviour<Director>
     //次のステージに進む処理
     public void NextStage()
     {
+        middleResumeFlag = false;
         currentStageNum++;
         MoveToStage(currentStageNum);
     }
@@ -109,13 +119,26 @@ public class Director : SingletonMonoBehaviour<Director>
         yield return new WaitForSeconds(fadeWaitTime);
         //シーンを非同期で読込し、読み込まれるまで待機する
         yield return SceneManager.LoadSceneAsync(stageName[stageNum]);
+        Debug.Log(player.transform.position);
+        // 中間ポイントが存在するかどうか
+        if (middlePoint != null)
+        {
+            // 中間ポイントを取っていたら，そこから再開
+            if (middleResumeFlag)
+            {
+                player.transform.position = middlePoint.transform.position + new Vector3(0.0f, 0.5f, 0.0f);
+                player.transform.rotation = middlePoint.transform.rotation;
+            }
+        }
         //フェードアウトさせる
         fadeCanvas.fadeOut = true;
-        if(stageNum == 0) // スタート画面での音
+        // スタート画面での音
+        if (stageNum == 0)
         {
             audioSource.PlayOneShot(titleSound);
         }
-        else if (stageNum == stageName.Length - 1) // クリア画面での音
+        // クリア画面での音
+        else if (stageNum == stageName.Length - 1)
         {
             for(int i = 0; i < gameClearSounds.Length; i++)
             {
@@ -190,6 +213,9 @@ public class Director : SingletonMonoBehaviour<Director>
     // リトライ
     public void Retry()
     {
+        // 中間ポイントに達しているか確認
+        if (player.GetComponent<PlayerController>().middlePointFlag)
+            middleResumeFlag = true;
         Destroy(gameOverCanvasClone);
         MoveToStage(currentStageNum);
     }
