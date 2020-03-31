@@ -12,8 +12,8 @@ TagManager:
   - Ice
   - WindZone
   - Accel
-  - Pick Up
   - Wall
+  - MiddlePoint
   layers:
   - Default
   - TransparentFX

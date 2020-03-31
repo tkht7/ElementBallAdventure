@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     public float rushSpeed;
     public float flameJumpSpeed;
     public Material[] _material;
+    public bool middlePointFlag;
 
     public AudioClip rushSound;
     public AudioClip flameSound;
@@ -95,7 +96,8 @@ public class PlayerController : MonoBehaviour
         shellCollider2 = shell2.GetComponent<BoxCollider>();
 
         rb.maxAngularVelocity = 100; // 最大回転速度の上限を上げる
-        
+
+        middlePointFlag = false;
         onGround = false;
         moveDecayRate = groundMoveDecayRate;
         playerJumpSpeed = 0.0f;
@@ -419,6 +421,9 @@ public class PlayerController : MonoBehaviour
         // 張り付けるかどうかの判定 (触れている物体が透過する場合は張り付かない)
         if (useIce && iceCount < iceStickingAcceptTime && !collider.isTrigger)
             ApplyIceSticking(collider);
+
+        // 中間ポイント到達判定
+        if (collider.gameObject.CompareTag("MiddlePoint")) middlePointFlag = true;
     }
 
     void OnTriggerExit(Collider collider)
