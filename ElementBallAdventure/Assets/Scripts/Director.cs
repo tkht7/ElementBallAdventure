@@ -119,7 +119,6 @@ public class Director : SingletonMonoBehaviour<Director>
         yield return new WaitForSeconds(fadeWaitTime);
         //シーンを非同期で読込し、読み込まれるまで待機する
         yield return SceneManager.LoadSceneAsync(stageName[stageNum]);
-        Debug.Log(player.transform.position);
         // 中間ポイントが存在するかどうか
         if (middlePoint != null)
         {
@@ -166,7 +165,7 @@ public class Director : SingletonMonoBehaviour<Director>
         // イベントトリガーを取得
         eventTriggers = gameOverCanvasClone.GetComponentsInChildren<EventTrigger>();
 
-        //マウスとキーボード選択を両立
+        //マウスとキーボード選択を両立したボタン
         eventTriggers[0].triggers = new List<EventTrigger.Entry>();
         EventTrigger.Entry entry1;
 
@@ -214,7 +213,7 @@ public class Director : SingletonMonoBehaviour<Director>
     public void Retry()
     {
         // 中間ポイントに達しているか確認
-        if (player.GetComponent<PlayerController>().middlePointFlag)
+        if (middlePoint.GetComponent<MiddlePointDetector>().middlePointFlag)
             middleResumeFlag = true;
         Destroy(gameOverCanvasClone);
         MoveToStage(currentStageNum);
