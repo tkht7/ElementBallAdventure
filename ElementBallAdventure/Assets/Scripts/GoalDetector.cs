@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class GoalDetector : MonoBehaviour
 {
-    public Text goalText;
+    private Image goalMessage;
     private AudioSource audioSource;
 
     private Director director;
@@ -14,9 +14,10 @@ public class GoalDetector : MonoBehaviour
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
-
+        goalMessage = GameObject.Find("GoalMessage").GetComponent<Image>();
         director = GameObject.Find("Director").GetComponent<Director>();
-        goalText.text = "";
+
+        goalMessage.enabled = false;
     }
 
     //ゴールした時の処理
@@ -25,7 +26,7 @@ public class GoalDetector : MonoBehaviour
         if (collider.gameObject.CompareTag("Player") && !calledFlag)
         {
             calledFlag = true;
-            goalText.text = "GOAL!";
+            goalMessage.enabled = true;
             audioSource.Play();
 
             // 3秒後にステージ遷移する

@@ -12,7 +12,6 @@ public class PlayerController : MonoBehaviour
     public float rushSpeed;
     public float flameJumpSpeed;
     public Material[] _material;
-    public bool middlePointFlag;
 
     public AudioClip rushSound;
     public AudioClip flameSound;
@@ -64,7 +63,6 @@ public class PlayerController : MonoBehaviour
 
     private bool useIce;
     private bool iceSticking;
-    private float iceCount;
     private const float iceStickingAcceptTime = 0.2f;
 
     private GameObject frozenObject;
@@ -97,7 +95,6 @@ public class PlayerController : MonoBehaviour
 
         rb.maxAngularVelocity = 100; // 最大回転速度の上限を上げる
 
-        middlePointFlag = false;
         onGround = false;
         moveDecayRate = groundMoveDecayRate;
         playerJumpSpeed = 0.0f;
@@ -110,7 +107,6 @@ public class PlayerController : MonoBehaviour
         playerElement = normalElement;
         useIce = false;
         iceSticking = false;
-        iceCount = 0.0f;
     }
 
     // Update is called once per frame
@@ -149,7 +145,17 @@ public class PlayerController : MonoBehaviour
     {
         // 重力をAddForceでかけるメソッドを呼ぶ。
         if(useGravity)
-            SetLocalGravity(localGravity); 
+            SetLocalGravity(localGravity);
+
+        // 何かに張り付いているときの処理
+        if (iceSticking)
+        {
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+
+            // 張り付いた時，その物体と一緒に動く
+            IceStickingMove();
+        }
     }
 
     // プレイヤーに重力をかける
@@ -306,13 +312,13 @@ public class PlayerController : MonoBehaviour
 
     void IceAction()
     {
-        // 自身の回りに氷を張る
-        if (Input.GetKeyDown(KeyCode.X) && gage > 0.0f)
-            CreateIce();
-
         // 氷を張っているときの処理
         if (useIce)
             UseIceProcess();
+
+        // 自身の回りに氷を張る
+        if (Input.GetKeyDown(KeyCode.X) && gage > 0.0f)
+            CreateIce();
 
         // 張り付き解除
         if (Input.GetKeyUp(KeyCode.X) || gage <= 0.0f)
@@ -320,14 +326,14 @@ public class PlayerController : MonoBehaviour
 
 
         // 何かに張り付いているときの処理
-        if (iceSticking)
-        {
-            rb.velocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
+        //if (iceSticking)
+        //{
+        //    rb.velocity = Vector3.zero;
+        //    rb.angularVelocity = Vector3.zero;
 
-            // 張り付いた時，その物体と一緒に動く
-            IceStickingMove();
-        }
+        //    // 張り付いた時，その物体と一緒に動く
+        //    IceStickingMove();
+        //}
 
         // 地上にいるときゲージ回復
         if (onGround && !useIce)
@@ -335,12 +341,23 @@ public class PlayerController : MonoBehaviour
         elementGage.value = gage;
     }
 
+    // 氷を張っているときの処理
+    void UseIceProcess()
+    {
+        // 氷を張った瞬間に物体に触れてなかったら張り付けない
+        if (!iceSticking)
+        {
+            shellCollider1.isTrigger = false;
+            shellCollider2.isTrigger = false;
+        }
+        gage -= iceGageUseSpeed * Time.deltaTime;
+    }
+
     // 自身の回りに氷を張る
     void CreateIce()
     {
         shell1.SetActive(true);
         shell2.SetActive(true);
-
         useIce = true;
 
         // 効果音
@@ -348,21 +365,6 @@ public class PlayerController : MonoBehaviour
 
         // エフェクト　ないほうが良いかも
         //ps.Play();
-    }
-
-    // 氷を張っているときの処理
-    void UseIceProcess()
-    {
-        // 氷を張った瞬間(iceStickingAcceptTime以内)に物体に触れてなかったら張り付けない
-        if (!iceSticking && iceCount >= iceStickingAcceptTime)
-        {
-            shellCollider1.isTrigger = false;
-            shellCollider2.isTrigger = false;
-        }
-        // 氷を張ってからの時間を計測
-        iceCount += Time.deltaTime;
-
-        gage -= iceGageUseSpeed * Time.deltaTime;
     }
 
     // 張り付き解除
@@ -375,7 +377,6 @@ public class PlayerController : MonoBehaviour
         useGravity = true;
         shell1.SetActive(false);
         shell2.SetActive(false);
-        iceCount = 0.0f;
     }
 
     // 張り付いた物体と一緒に動く
@@ -419,11 +420,8 @@ public class PlayerController : MonoBehaviour
         else if (collider.gameObject.CompareTag("Ice"))   ChangeElement(iceElement, Color.cyan, Color.cyan);
 
         // 張り付けるかどうかの判定 (触れている物体が透過する場合は張り付かない)
-        if (useIce && iceCount < iceStickingAcceptTime && !collider.isTrigger)
+        if (useIce && !iceSticking && !collider.isTrigger)
             ApplyIceSticking(collider);
-
-        // 中間ポイント到達判定
-        if (collider.gameObject.CompareTag("MiddlePoint")) middlePointFlag = true;
     }
 
     void OnTriggerExit(Collider collider)
