@@ -11,7 +11,6 @@
     SubShader
     {
         Tags { "Queue"="AlphaTest" "IgnoreProjector"="true" "RenderType"="TransparentCutout" }
-        Cull Off
         Blend SrcAlpha OneMinusSrcAlpha
         Offset -1, -1
         LOD 200
