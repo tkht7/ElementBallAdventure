@@ -63,6 +63,7 @@ public class PlayerController : MonoBehaviour
 
     private bool useIce;
     private bool iceSticking;
+    private float iceCount;
     private const float iceStickingAcceptTime = 0.2f;
 
     private GameObject frozenObject;
@@ -107,6 +108,7 @@ public class PlayerController : MonoBehaviour
         playerElement = normalElement;
         useIce = false;
         iceSticking = false;
+        iceCount = 0.0f;
     }
 
     // Update is called once per frame
@@ -344,12 +346,15 @@ public class PlayerController : MonoBehaviour
     // 氷を張っているときの処理
     void UseIceProcess()
     {
-        // 氷を張った瞬間に物体に触れてなかったら張り付けない
-        if (!iceSticking)
+        // 氷を張った瞬間(iceCount0.1f以内)に物体に触れてなかったら張り付けない
+        if (!iceSticking && iceCount >= iceStickingAcceptTime)
         {
             shellCollider1.isTrigger = false;
             shellCollider2.isTrigger = false;
         }
+        // 氷を張ってからの時間を計測
+        iceCount += Time.deltaTime;
+
         gage -= iceGageUseSpeed * Time.deltaTime;
     }
 
@@ -377,6 +382,7 @@ public class PlayerController : MonoBehaviour
         useGravity = true;
         shell1.SetActive(false);
         shell2.SetActive(false);
+        iceCount = 0.0f;
     }
 
     // 張り付いた物体と一緒に動く
@@ -420,7 +426,7 @@ public class PlayerController : MonoBehaviour
         else if (collider.gameObject.CompareTag("Ice"))   ChangeElement(iceElement, Color.cyan, Color.cyan);
 
         // 張り付けるかどうかの判定 (触れている物体が透過する場合は張り付かない)
-        if (useIce && !iceSticking && !collider.isTrigger)
+        if (useIce && iceCount < iceStickingAcceptTime && !iceSticking && !collider.isTrigger)
             ApplyIceSticking(collider);
     }
 
