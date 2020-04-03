@@ -25,6 +25,7 @@ public class Director : SingletonMonoBehaviour<Director>
     public AudioClip[] gameClearSounds;
     private AudioSource audioSource;
 
+    private GameObject camera;
     private GameObject fadeCanvasClone;
     private FadeCanvas fadeCanvas;
     private GameObject gameOverCanvasClone;
@@ -34,7 +35,7 @@ public class Director : SingletonMonoBehaviour<Director>
     private Button[] buttons;
     private EventTrigger[] eventTriggers;
 
-    private bool middleResumeFlag;
+    public bool middleResumeFlag;
 
     public void Awake()
     {
@@ -54,6 +55,7 @@ public class Director : SingletonMonoBehaviour<Director>
         //デリゲートの登録
         SceneManager.sceneLoaded += OnSceneLoaded;
 
+        camera = GameObject.Find("CameraRelation");
         middlePoint = GameObject.Find("MiddlePoint");
         player = GameObject.FindGameObjectWithTag("Player").gameObject;
         playerRigidbody = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
@@ -65,6 +67,7 @@ public class Director : SingletonMonoBehaviour<Director>
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         //改めて取得
+        camera = GameObject.Find("CameraRelation");
         middlePoint = GameObject.Find("MiddlePoint");
         player = GameObject.FindGameObjectWithTag("Player");
         playerRigidbody = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
@@ -86,6 +89,10 @@ public class Director : SingletonMonoBehaviour<Director>
         {
             currentStageNum = 0;
             MoveToStage(currentStageNum);
+        }
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            currentStageNum = 2;
         }
     }
 
@@ -126,7 +133,7 @@ public class Director : SingletonMonoBehaviour<Director>
             if (middleResumeFlag)
             {
                 player.transform.position = middlePoint.transform.position + new Vector3(0.0f, 0.5f, 0.0f);
-                player.transform.rotation = middlePoint.transform.rotation;
+                camera.transform.rotation = middlePoint.transform.rotation;
             }
         }
         //フェードアウトさせる
@@ -212,11 +219,16 @@ public class Director : SingletonMonoBehaviour<Director>
     // リトライ
     public void Retry()
     {
-        // 中間ポイントに達しているか確認
-        if (middlePoint.GetComponent<MiddlePointDetector>().middlePointFlag)
-            middleResumeFlag = true;
+        // 中間ポイントが存在するかどうか
+        if (middlePoint != null)
+        {
+            // 中間ポイントに達しているか確認
+            if (middlePoint.GetComponent<MiddlePointDetector>().middlePointFlag)
+                middleResumeFlag = true;
+        }
         Destroy(gameOverCanvasClone);
         MoveToStage(currentStageNum);
+
     }
 
     // スタート画面に戻る

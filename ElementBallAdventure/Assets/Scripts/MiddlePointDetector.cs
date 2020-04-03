@@ -4,13 +4,15 @@ using UnityEngine;
 
 public class MiddlePointDetector : MonoBehaviour
 {
+    private Director director;
     private AudioSource audioSource;
     public bool middlePointFlag;
 
     void Start()
     {
+        director = GameObject.Find("Director").GetComponent<Director>();
         audioSource = GetComponent<AudioSource>();
-        middlePointFlag = false;
+        middlePointFlag = director.middleResumeFlag;
     }
     
     void OnTriggerEnter(Collider collider)
