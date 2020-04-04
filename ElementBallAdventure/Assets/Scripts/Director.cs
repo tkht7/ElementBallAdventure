@@ -23,19 +23,23 @@ public class Director : SingletonMonoBehaviour<Director>
     public AudioClip decisionSound;
     public AudioClip gameOverSound;
     public AudioClip[] gameClearSounds;
-    private AudioSource audioSource;
+    public AudioClip[] BGM;
+    private AudioSource[] audioSource;
 
     private GameObject camera;
     private GameObject fadeCanvasClone;
     private FadeCanvas fadeCanvas;
     private GameObject gameOverCanvasClone;
     private GameObject middlePoint;
+    private GameObject goal;
+    private GoalDetector goalDetector;
     private GameObject player;
     private Rigidbody playerRigidbody;
     private Button[] buttons;
     private EventTrigger[] eventTriggers;
 
     public bool middleResumeFlag;
+    private bool transitionFlag; // 画面遷移を複数行わないように制御
 
     public void Awake()
     {
@@ -59,9 +63,10 @@ public class Director : SingletonMonoBehaviour<Director>
         middlePoint = GameObject.Find("MiddlePoint");
         player = GameObject.FindGameObjectWithTag("Player").gameObject;
         playerRigidbody = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
-        audioSource = GetComponent<AudioSource>();
-        audioSource.PlayOneShot(titleSound); // スタート画面での音
+        audioSource = GetComponents<AudioSource>();
+        audioSource[0].PlayOneShot(titleSound); // タイトル画面での音
         middleResumeFlag = false;
+        transitionFlag = false;
     }
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -69,17 +74,40 @@ public class Director : SingletonMonoBehaviour<Director>
         //改めて取得
         camera = GameObject.Find("CameraRelation");
         middlePoint = GameObject.Find("MiddlePoint");
+        goal = GameObject.Find("Goal");
         player = GameObject.FindGameObjectWithTag("Player");
         playerRigidbody = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
+
+        if (goal != null)
+        {
+            goalDetector = goal.GetComponent<GoalDetector>();
+        }
+
+        // 各シーンでのBGMなどの音を流す
+        if (currentStageNum == 0)
+        {
+            audioSource[0].PlayOneShot(titleSound);
+        }
+        else if (currentStageNum == 4)
+        {
+            for (int i = 0; i < gameClearSounds.Length; i++)
+            {
+                audioSource[0].PlayOneShot(gameClearSounds[i]);
+            }
+        }
+        else
+        {
+            audioSource[1].Play();
+        }
     }
 
 
     void Update()
     {
         // スタート画面から最初のステージへ
-        if (currentStageNum == 0 && Input.GetKeyDown(KeyCode.Space))
+        if (currentStageNum == 0 && Input.GetKeyDown(KeyCode.Space) && !transitionFlag)
         {
-            audioSource.PlayOneShot(decisionSound);
+            audioSource[0].PlayOneShot(decisionSound);
             currentStageNum++;
             MoveToStage(currentStageNum);
         }
@@ -90,9 +118,13 @@ public class Director : SingletonMonoBehaviour<Director>
             currentStageNum = 0;
             MoveToStage(currentStageNum);
         }
-        if (Input.GetKeyDown(KeyCode.Q))
+
+        if (goalDetector != null)
         {
-            currentStageNum = 2;
+            if (goalDetector.goalFlag)
+            {
+                audioSource[1].Stop();
+            }
         }
     }
 
@@ -138,19 +170,8 @@ public class Director : SingletonMonoBehaviour<Director>
         }
         //フェードアウトさせる
         fadeCanvas.fadeOut = true;
-        // スタート画面での音
-        if (stageNum == 0)
-        {
-            audioSource.PlayOneShot(titleSound);
-        }
-        // クリア画面での音
-        else if (stageNum == stageName.Length - 1)
-        {
-            for(int i = 0; i < gameClearSounds.Length; i++)
-            {
-                audioSource.PlayOneShot(gameClearSounds[i]);
-            }
-        }
+
+        transitionFlag = false;
     }
 
     //ゲームオーバー処理
@@ -163,7 +184,13 @@ public class Director : SingletonMonoBehaviour<Director>
         gameOverCanvasClone = Instantiate(gameOverCanvasPrefab);
 
         // 効果音
-        audioSource.PlayOneShot(gameOverSound);
+        audioSource[0].PlayOneShot(gameOverSound);
+
+        // BGM停止
+        audioSource[1].Stop();
+
+        // 画面遷移中フラグ
+        transitionFlag = true;
 
         //ボタンを取得
         buttons = gameOverCanvasClone.GetComponentsInChildren<Button>();
