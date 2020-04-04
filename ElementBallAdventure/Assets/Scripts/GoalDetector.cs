@@ -9,7 +9,8 @@ public class GoalDetector : MonoBehaviour
     private AudioSource audioSource;
 
     private Director director;
-    private bool calledFlag = false;
+    private bool calledFlag;
+    public bool goalFlag;
 
     void Start()
     {
@@ -18,6 +19,8 @@ public class GoalDetector : MonoBehaviour
         director = GameObject.Find("Director").GetComponent<Director>();
 
         goalMessage.enabled = false;
+        calledFlag = false;
+        goalFlag = false;
     }
 
     //ゴールした時の処理
@@ -27,6 +30,7 @@ public class GoalDetector : MonoBehaviour
         {
             calledFlag = true;
             goalMessage.enabled = true;
+            goalFlag = true;
             audioSource.Play();
 
             // 3秒後にステージ遷移する

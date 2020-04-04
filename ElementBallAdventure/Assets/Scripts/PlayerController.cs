@@ -5,13 +5,13 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    public float playerMoveForce;
-    public float[] initialPlayerJumpSpeed;
-    public float playerGravity;
-    public float playerGravityFall;
-    public float rushSpeed;
-    public float flameJumpSpeed;
-    public Material[] _material;
+    public float playerMoveForce;          // 移動時に加える力の大きさ
+    public float[] initialPlayerJumpSpeed; // 速度ごとのジャンプの初速
+    public float playerGravity;            // 通常時の重力
+    public float playerGravityFall;        // 降下時の重力
+    public float rushSpeed;                // 突進使用時の速さ
+    public float flameJumpSpeed;           // 大ジャンプのジャンプスピード
+    public Material[] _material;           // 属性ごとの見た目
 
     public AudioClip rushSound;
     public AudioClip flameSound;
@@ -19,56 +19,71 @@ public class PlayerController : MonoBehaviour
     public AudioClip itemGetSound;
     private AudioSource audioSource;
 
+    // プレイヤーの状態　属性
     private int playerElement;
     private const int normalElement = 0;
     private const int rushElement = 1;
     private const int flameElement = 2;
     private const int iceElement = 3;
+    
+    private Rigidbody rb; // Rigidbody
 
-    private Image gageImage;
-    private Rigidbody rb;
+    // 能力使用時のエフェクトとその色
     private ParticleSystem ps;
     private ParticleSystem.MainModule psColor;
+
+    // Ice使用時に出てくる氷
     private GameObject shell1;
     private GameObject shell2;
     private BoxCollider shellCollider1;
     private BoxCollider shellCollider2;
 
-    private bool onGround;
-    private Vector3 movement;
+    private bool onGround;    // プレイヤーの地面との接地判定
+    private Vector3 movement; // プレイヤーの移動量
+
+    // ジャンプ中に加わる移動のための力は半分になる
     private float moveDecayRate;
     private const float groundMoveDecayRate = 1.0f;
     private const float jumpMoveDecayRate = 0.5f;
 
+    // プレイヤーのスピードによりジャンプの大きさが変わる
+    // slowSpeed未満，highSpeed未満，highSpeed以上の三つ
     private float playerSpeed;
     private const float slowSpeed = 5.0f;
     private const float highSpeed = 15.0f;
+    private float playerJumpSpeed;
 
+    // どのジャンプを使っているか
+    // 使用してないorジャンプor大ジャンプ
     private int jumpState;
     private const int notJump = 0;
     private const int normalJump = 1;
     private const int flameJump = 2;
 
-    private float playerJumpSpeed;
+    // 重力使用判定
     private bool useGravity;
     private float localGravity;
-    public bool rushFlag;
-    private float rushCount;
-    private const float rushNoGravityTime = 0.25f;
-    private const float rushStateTime = 1.2f;
 
+    private float rushCount;                       // Rushを使用してからの時間計測用
+    private const float rushNoGravityTime = 0.25f; // 突進時の重力無効時間
+    private const float rushStateTime = 1.2f;      // 突進状態であると判断される時間
+    public bool rushFlag;                          // 突進状態であるかどうか
+
+    // 画面下部のゲージ関連
+    private Image gageImage;
     private Slider elementGage;
     private float gage;
-    private const float fullGage = 1.0f;
+    private const float fullGage = 1.0f; // ゲージ満タン時の数値
 
-    private bool useIce;
-    private bool iceSticking;
-    private float iceCount;
-    private const float iceStickingAcceptTime = 0.2f;
+    // Ice使用時の状態など
+    private bool useIce;      // Iceを使用しているかどうか
+    private bool iceSticking; // 何かに張り付いているかどうか
+    private float iceCount;   // Iceを使用してからの時間計測用
+    private const float iceStickingAcceptTime = 0.2f; // 物体にくっつけるかどうかの許容時間
+    private GameObject frozenObject; // 張り付いているオブジェクト
+    private Vector3 FrozenPos;       // 張り付いているオブジェクトの位置
 
-    private GameObject frozenObject;
-    private Vector3 FrozenPos;
-
+    // 各属性のゲージ回復速度・消費速度
     private const float rushGageRecoverSpeed = 0.25f;
     private const float flameGageRecoverSpeed = 1.0f;
     private const float iceGageRecoverSpeed = 0.25f;
@@ -128,19 +143,6 @@ public class PlayerController : MonoBehaviour
 
         // 各属性のアクション
         ElementAction();
-
-
-
-        // スピードテスト
-        //if (Input.GetKeyDown(KeyCode.Q))
-        //{
-        //    Vector3 testSpeed = new Vector3(0, 0, 50.0f);
-        //    rb.velocity = testSpeed;
-        //}
-        //Debug.Log(rb.velocity);
-
-
-        //Debug.Log(Time.deltaTime);
     }
 
     private void FixedUpdate()
@@ -325,17 +327,6 @@ public class PlayerController : MonoBehaviour
         // 張り付き解除
         if (Input.GetKeyUp(KeyCode.X) || gage <= 0.0f)
             IceStickingCancel();
-
-
-        // 何かに張り付いているときの処理
-        //if (iceSticking)
-        //{
-        //    rb.velocity = Vector3.zero;
-        //    rb.angularVelocity = Vector3.zero;
-
-        //    // 張り付いた時，その物体と一緒に動く
-        //    IceStickingMove();
-        //}
 
         // 地上にいるときゲージ回復
         if (onGround && !useIce)
