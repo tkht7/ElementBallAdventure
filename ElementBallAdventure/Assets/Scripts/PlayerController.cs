@@ -5,13 +5,13 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    public float playerMoveForce;
-    public float[] initialPlayerJumpSpeed;
-    public float playerGravity;
-    public float playerGravityFall;
-    public float rushSpeed;
-    public float flameJumpSpeed;
-    public Material[] _material;
+    public float playerMoveForce;          // 移動時に加える力の大きさ
+    public float[] initialPlayerJumpSpeed; // 速度ごとのジャンプの初速
+    public float playerGravity;            // 通常時の重力
+    public float playerGravityFall;        // 降下時の重力
+    public float rushSpeed;                // 突進使用時の速さ
+    public float flameJumpSpeed;           // 大ジャンプのジャンプスピード
+    public Material[] _material;           // 属性ごとの見た目
 
     public AudioClip rushSound;
     public AudioClip flameSound;
@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour
     public AudioClip itemGetSound;
     private AudioSource audioSource;
 
+    // プレイヤーの状態　属性ごと
     private int playerElement;
     private const int normalElement = 0;
     private const int rushElement = 1;
@@ -36,38 +37,48 @@ public class PlayerController : MonoBehaviour
 
     private bool onGround;
     private Vector3 movement;
+
+    // ジャンプ中に加わる移動のための力は半分になる
     private float moveDecayRate;
     private const float groundMoveDecayRate = 1.0f;
     private const float jumpMoveDecayRate = 0.5f;
 
+    // プレイヤーのスピードによりジャンプの大きさが変わる
+    // slowSpeed未満，highSpeed未満，highSpeed以上の三つ
     private float playerSpeed;
     private const float slowSpeed = 5.0f;
     private const float highSpeed = 15.0f;
+    private float playerJumpSpeed;
 
+    // どのジャンプを使っているか
+    // 使用してない，ジャンプ，大ジャンプ
     private int jumpState;
     private const int notJump = 0;
     private const int normalJump = 1;
     private const int flameJump = 2;
-
-    private float playerJumpSpeed;
+    
+    // 重力使用判定
     private bool useGravity;
     private float localGravity;
-    public bool rushFlag;
+    
     private float rushCount;
-    private const float rushNoGravityTime = 0.25f;
-    private const float rushStateTime = 1.2f;
+    private const float rushNoGravityTime = 0.25f; // 突進時の重力無効時間
+    private const float rushStateTime = 1.2f;      // 突進状態であると判断される時間
+    public bool rushFlag;                          // 突進状態であるかどうか
 
     private Slider elementGage;
     private float gage;
-    private const float fullGage = 1.0f;
+    private const float fullGage = 1.0f; // ゲージ満タン時の数値
 
     private bool useIce;
     private bool iceSticking;
+    private float iceCount;
     private const float iceStickingAcceptTime = 0.2f;
 
     private GameObject frozenObject;
     private Vector3 FrozenPos;
 
+    // 各属性のゲージ回復速度・消費速度
     private const float rushGageRecoverSpeed = 0.25f;
     private const float flameGageRecoverSpeed = 1.0f;
     private const float iceGageRecoverSpeed = 0.25f;
@@ -107,9 +118,9 @@ public class PlayerController : MonoBehaviour
         playerElement = normalElement;
         useIce = false;
         iceSticking = false;
+        iceCount = 0.0f;
     }
-
-    // Update is called once per frame
+    
     void Update()
     {
         // 移動量の調整
@@ -126,19 +137,6 @@ public class PlayerController : MonoBehaviour
 
         // 各属性のアクション
         ElementAction();
-
-
-
-        // スピードテスト
-        //if (Input.GetKeyDown(KeyCode.Q))
-        //{
-        //    Vector3 testSpeed = new Vector3(0, 0, 50.0f);
-        //    rb.velocity = testSpeed;
-        //}
-        //Debug.Log(rb.velocity);
-
-
-        //Debug.Log(Time.deltaTime);
     }
 
     private void FixedUpdate()
@@ -245,8 +243,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    
-
     void RushAction()
     {
         if (Input.GetKeyDown(KeyCode.X) && gage == fullGage)
@@ -324,17 +320,6 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.X) || gage <= 0.0f)
             IceStickingCancel();
 
-
-        // 何かに張り付いているときの処理
-        //if (iceSticking)
-        //{
-        //    rb.velocity = Vector3.zero;
-        //    rb.angularVelocity = Vector3.zero;
-
-        //    // 張り付いた時，その物体と一緒に動く
-        //    IceStickingMove();
-        //}
-
         // 地上にいるときゲージ回復
         if (onGround && !useIce)
             GageRecover(iceGageRecoverSpeed);
@@ -344,12 +329,15 @@ public class PlayerController : MonoBehaviour
     // 氷を張っているときの処理
     void UseIceProcess()
     {
-        // 氷を張った瞬間に物体に触れてなかったら張り付けない
-        if (!iceSticking)
+        // 氷を張った瞬間(iceCount0.1f以内)に物体に触れてなかったら張り付けない
+        if (!iceSticking && iceCount >= iceStickingAcceptTime)
         {
             shellCollider1.isTrigger = false;
             shellCollider2.isTrigger = false;
         }
+        // 氷を張ってからの時間を計測
+        iceCount += Time.deltaTime;
+
         gage -= iceGageUseSpeed * Time.deltaTime;
     }
 
@@ -377,6 +365,7 @@ public class PlayerController : MonoBehaviour
         useGravity = true;
         shell1.SetActive(false);
         shell2.SetActive(false);
+        iceCount = 0.0f;
     }
 
     // 張り付いた物体と一緒に動く
@@ -419,8 +408,8 @@ public class PlayerController : MonoBehaviour
         else if (collider.gameObject.CompareTag("Flame")) ChangeElement(flameElement, Color.red, Color.red);
         else if (collider.gameObject.CompareTag("Ice"))   ChangeElement(iceElement, Color.cyan, Color.cyan);
 
-        // 張り付けるかどうかの判定 (触れている物体が透過する場合は張り付かない)
-        if (useIce && !iceSticking && !collider.isTrigger)
+        // 氷を張った時，張り付けるかどうかの判定 (触れている物体が透過する場合は張り付かない)
+        if (useIce && iceCount < iceStickingAcceptTime && !iceSticking && !collider.isTrigger)
             ApplyIceSticking(collider);
     }
 
