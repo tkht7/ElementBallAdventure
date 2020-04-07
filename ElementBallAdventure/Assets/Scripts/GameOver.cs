@@ -20,6 +20,7 @@ public class GameOver : MonoBehaviour
         if(player.transform.position.y <= gameOverHeight && !calledFlag)
         {
             calledFlag = true;
+            director.measureTimeFlag = false;
             director.GameOver();
         }
     }
