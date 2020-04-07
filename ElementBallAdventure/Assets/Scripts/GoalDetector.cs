@@ -33,13 +33,22 @@ public class GoalDetector : MonoBehaviour
             goalFlag = true;
             audioSource.Play();
 
+            // ステージセレクトの場合はタイトルに戻る
+            string stageTransition;
+            if (director.stageSelectFlag) stageTransition = "ReturnTitle";
+            else                          stageTransition = "NextStage";
             // 3秒後にステージ遷移する
-            Invoke("NextStage", 3);
+            Invoke(stageTransition, 3);
         }            
     }
 
     void NextStage()
     {
         director.NextStage();
+    }
+
+    void ReturnTitle()
+    {
+        director.ReturnTitle();
     }
 }
