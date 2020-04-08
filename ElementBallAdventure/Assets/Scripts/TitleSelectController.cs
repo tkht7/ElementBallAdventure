@@ -63,6 +63,7 @@ public class TitleSelectController : MonoBehaviour
         {
             audioSource.PlayOneShot(decisionSound);
             director.currentStageNum++;
+            director.stageSelectFlag = false;
             director.MoveToStage(director.currentStageNum);
         }
         else
