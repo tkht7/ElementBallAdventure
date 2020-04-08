@@ -48,6 +48,10 @@ public class Director : SingletonMonoBehaviour<Director>
     public bool transitionFlag; // 画面遷移を複数行わないように制御
 
     private Text clearTimeText;
+    private Text stage1ResultText;
+    private Text stage2ResultText;
+    private Text stage3ResultText;
+    private Text endResultText;
     [System.NonSerialized]
     public List<float> clearTime = new List<float> { 0.0f, 0.0f, 0.0f };
     public bool measureTimeFlag;
@@ -105,11 +109,19 @@ public class Director : SingletonMonoBehaviour<Director>
         }
         else if (currentStageNum == clearScene)
         {
+            stage1ResultText = GameObject.Find("Stage1ResultText").GetComponent<Text>();
+            stage2ResultText = GameObject.Find("Stage2ResultText").GetComponent<Text>();
+            stage3ResultText = GameObject.Find("Stage3ResultText").GetComponent<Text>();
+            endResultText = GameObject.Find("EndResultText").GetComponent<Text>();
+            float totalTime = 0.0f;
+            for (int i = 0; i < clearTime.Count; i++)
+                totalTime += clearTime[i];
+            stage1ResultText.text = "Stage1: " + timeShaping(clearTime[0]);
+            stage2ResultText.text = "Stage2: " + timeShaping(clearTime[1]);
+            stage3ResultText.text = "Stage3: " + timeShaping(clearTime[2]);
+            endResultText.text = "TotalTime: " + timeShaping(totalTime);
             for (int i = 0; i < gameClearSounds.Length; i++)
-            {
                 audioSource[0].PlayOneShot(gameClearSounds[i]);
-            }
-
         }
         else // startSceneとclearScene以外ではBGMを流す
         {
@@ -122,7 +134,7 @@ public class Director : SingletonMonoBehaviour<Director>
     void Update()
     {
         // クリア画面からスタート画面へ
-        if (currentStageNum == clearScene && Input.GetKeyDown(KeyCode.Space))
+        if (currentStageNum == clearScene && Input.GetKeyDown(KeyCode.Z))
         {
             currentStageNum = 0;
             MoveToStage(currentStageNum);
@@ -145,12 +157,16 @@ public class Director : SingletonMonoBehaviour<Director>
         {
             clearTimeText.text = "Time: " + timeShaping(clearTime[currentStageNum - 1]);
         }
+        else
+        {
+            clearTimeText.text = "";
+        }
     }
 
     public string timeShaping(float time)
     {
-        return ((int)time / 60).ToString("00") + ":"          // 分
-               + ((int)time % 60).ToString("00") + ":"        // 秒
+        return ((int)time / 60).ToString("00") + ":"             // 分
+               + ((int)time % 60).ToString("00") + ":"           // 秒
                + (time - (int)time).ToString("F2").Substring(2); // 小数部
     }
 
