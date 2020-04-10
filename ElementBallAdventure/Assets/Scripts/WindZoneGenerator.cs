@@ -9,28 +9,28 @@ public class WindZoneGenerator : MonoBehaviour
     private AudioSource audioSource;
 
     private GameObject player;
-    private float span;
+    private const float shootRange = 60.0f;
     private float delta;
+    private const float span = 4.0f;
 
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
         player = GameObject.Find("Player");
-        span = 4.0f;
         delta = 0.0f;
     }
     
     void Update()
     {
         // プレイヤーが近づいた時だけ生成する
-        if (player.transform.position.z >= 236.0f && player.transform.position.z <= 296.0f)
+        if (player.transform.position.z >= transform.position.z - shootRange && player.transform.position.z <= transform.position.z)
         {
             delta += Time.deltaTime;
             if (delta > span)
             {
                 delta = 0.0f;
                 GameObject wind = Instantiate(WindZone) as GameObject;
-                wind.transform.position = new Vector3(-7.0f, 32.0f, 306.0f);
+                wind.transform.position = transform.position;
                 audioSource.Play();
             }
         }

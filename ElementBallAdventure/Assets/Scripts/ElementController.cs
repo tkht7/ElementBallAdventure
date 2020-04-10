@@ -8,6 +8,7 @@ public class ElementController : MonoBehaviour
     private GameObject content1;
     private GameObject content2;
     private float count;
+    private const float regenerationTime = 5.0f;
     
     void Start()
     {
@@ -23,7 +24,7 @@ public class ElementController : MonoBehaviour
         if (!container.activeSelf)
         {
             count += Time.deltaTime;
-            if (count >= 5.0f)
+            if (count >= regenerationTime)
             {
                 container.SetActive(true);
                 content1.SetActive(true);

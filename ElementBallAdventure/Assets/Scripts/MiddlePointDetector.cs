@@ -12,6 +12,7 @@ public class MiddlePointDetector : MonoBehaviour
     {
         director = GameObject.Find("Director").GetComponent<Director>();
         audioSource = GetComponent<AudioSource>();
+        // 中間ポイントから再開した時，すでに中間ポイントに到達していることにするため，directorから状態を取得
         middlePointFlag = director.middleResumeFlag;
     }
     

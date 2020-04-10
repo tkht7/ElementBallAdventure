@@ -4,10 +4,18 @@ using UnityEngine;
 
 public class MoveFloorController : MonoBehaviour
 {
-    public bool[] moveDirect = new bool[3]; // 動く方向
-    public bool[] reverse = new bool[3]; // 最初に動く向きを反転
-    public float moveDistance; // 動く距離
-    public float moveSpeed; // 動く速さ
+    // 動く方向(どの軸に沿って動くか)
+    [SerializeField]
+    private bool[] moveDirect = new bool[3];
+    // 最初に動く向きを反転
+    [SerializeField]
+    private bool[] reverse = new bool[3];
+    // 動く距離
+    [SerializeField]
+    private float moveDistance;
+    // 動く速さ
+    [SerializeField]
+    private float moveSpeed;
 
     private Rigidbody rb;
     private float[] rev = { 1.0f, 1.0f, 1.0f };

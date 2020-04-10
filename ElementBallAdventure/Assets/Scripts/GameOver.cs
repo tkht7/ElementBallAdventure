@@ -7,7 +7,7 @@ public class GameOver : MonoBehaviour
     private Director director;
     private GameObject player;
     private bool calledFlag = false;
-    private const float gameOverHeight = -80.0f;
+    private const float gameOverHeight = -80.0f; // プレイヤーがこの高さ以下に達したらゲームオーバー
 
     void Start()
     {

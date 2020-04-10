@@ -107,7 +107,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddcb585db02f6dc4baf7e5f8ad64b1a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  accelSound: {fileID: 8300000, guid: e68eef767a664794baab5f3131fd7c7f, type: 3}
 --- !u!82 &2643141665205431443
 AudioSource:
   m_ObjectHideFlags: 0
