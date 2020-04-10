@@ -38,7 +38,6 @@ public class CameraTransparent : MonoBehaviour
         // 前回の結果を退避してからRaycastして今回の遮蔽物のリストを取得する
         RaycastHit[] _hits = Physics.RaycastAll(_ray, _difference.magnitude, layerMask_);
 
-
         rendererHitsPrevs_ = rendererHitsList_.ToArray();
         rendererHitsList_.Clear();
         // 遮蔽物は透明にする

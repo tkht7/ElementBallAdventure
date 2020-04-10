@@ -5,18 +5,29 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    public float playerMoveForce;          // 移動時に加える力の大きさ
-    public float[] initialPlayerJumpSpeed; // 速度ごとのジャンプの初速
-    public float playerGravity;            // 通常時の重力
-    public float playerGravityFall;        // 降下時の重力
-    public float rushSpeed;                // 突進使用時の速さ
-    public float flameJumpSpeed;           // 大ジャンプのジャンプスピード
-    public Material[] _material;           // 属性ごとの見た目
+    [SerializeField]
+    private float playerMoveForce;          // 移動時に加える力の大きさ
+    [SerializeField]
+    private float[] initialPlayerJumpSpeed; // 速度ごとのジャンプの初速
+    [SerializeField]
+    private float playerGravity;            // 通常時の重力
+    [SerializeField]
+    private float playerGravityFall;        // 降下時の重力
+    [SerializeField]
+    private float rushSpeed;                // 突進使用時の速さ
+    [SerializeField]
+    private float flameJumpSpeed;           // 大ジャンプの初速
+    [SerializeField]
+    private Material[] _material;           // 属性ごとの見た目
 
-    public AudioClip rushSound;
-    public AudioClip flameSound;
-    public AudioClip iceSound;
-    public AudioClip itemGetSound;
+    [SerializeField]
+    private AudioClip rushSound;
+    [SerializeField]
+    private AudioClip flameSound;
+    [SerializeField]
+    private AudioClip iceSound;
+    [SerializeField]
+    private AudioClip itemGetSound;
     private AudioSource audioSource;
 
     // プレイヤーの状態　属性
@@ -79,7 +90,7 @@ public class PlayerController : MonoBehaviour
     private bool useIce;      // Iceを使用しているかどうか
     private bool iceSticking; // 何かに張り付いているかどうか
     private float iceCount;   // Iceを使用してからの時間計測用
-    private const float iceStickingAcceptTime = 0.2f; // 物体にくっつけるかどうかの許容時間
+    private const float iceStickingAcceptTime = 0.2f; // 物体に張り付く許容時間
     private GameObject frozenObject; // 張り付いているオブジェクト
     private Vector3 FrozenPos;       // 張り付いているオブジェクトの位置
 
@@ -145,7 +156,7 @@ public class PlayerController : MonoBehaviour
         ElementAction();
     }
 
-    private void FixedUpdate()
+    void FixedUpdate()
     {
         // 重力をAddForceでかけるメソッドを呼ぶ。
         if(useGravity)
@@ -163,7 +174,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // プレイヤーに重力をかける
-    private void SetLocalGravity(float gravity)
+    void SetLocalGravity(float gravity)
     {
         rb.AddForce(new Vector3(0.0f, gravity, 0.0f), ForceMode.Acceleration);
     }
@@ -181,7 +192,7 @@ public class PlayerController : MonoBehaviour
         var moveHorizontal = 0.0f;
         var moveVertical = 0.0f;
 
-        // 前後左右の移動方向を決める。対になるボタンの同時押しでは何も起こらない。
+        // 前後左右の移動方向を決める。対になるボタンの同時押しでは何も起こらないようにする
         if (Input.GetKey(KeyCode.RightArrow)) moveHorizontal += 1.0f;
         if (Input.GetKey(KeyCode.LeftArrow))  moveHorizontal -= 1.0f;
         if (Input.GetKey(KeyCode.UpArrow))    moveVertical += 1.0f;

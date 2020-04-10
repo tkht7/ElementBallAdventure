@@ -8,6 +8,8 @@ public class AttackedWallController : MonoBehaviour
     private bool attackedFlag;
     private bool rotatedFlag;
     private float totalRotation;
+    // 壁が倒れる速さ
+    private const float rotationSpeed = 60.0f;
     
     void Start()
     {
@@ -22,17 +24,15 @@ public class AttackedWallController : MonoBehaviour
         // 相手が突進状態でぶつかってきたら壁を倒し始める
         if(attackedFlag && !rotatedFlag)
         {
-            //transform.Rotate(60.0f * Time.deltaTime, 0.0f, 0.0f);
-            totalRotation += 60.0f * Time.deltaTime;
+            totalRotation += rotationSpeed * Time.deltaTime;
             transform.rotation = Quaternion.Euler(totalRotation, 0.0f, 0.0f);
-            // 90度回転で止める(判定を少し早めにする)
+            // 90度回転で止める
             if (totalRotation >= 90.0f)
             {
                 rotatedFlag = true;
                 transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
             }
         }
-        // Debug.Log(transform.eulerAngles.x);
     }
 
     void OnTriggerEnter(Collider collider)

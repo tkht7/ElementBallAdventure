@@ -9,7 +9,6 @@ public class GoalDetector : MonoBehaviour
     private AudioSource audioSource;
 
     private Director director;
-    private bool calledFlag;
     public bool goalFlag;
 
     void Start()
@@ -19,21 +18,19 @@ public class GoalDetector : MonoBehaviour
         director = GameObject.Find("Director").GetComponent<Director>();
 
         goalMessage.enabled = false;
-        calledFlag = false;
         goalFlag = false;
     }
 
     //ゴールした時の処理
     void OnTriggerEnter(Collider collider)
     {
-        if (collider.gameObject.CompareTag("Player") && !calledFlag)
+        if (collider.gameObject.CompareTag("Player") && !goalFlag)
         {
-            calledFlag = true;
-            goalMessage.enabled = true;
+            goalMessage.enabled = true; // ゴールメッセージを表示
             goalFlag = true;
             audioSource.Play();
 
-            // ステージセレクトの場合はタイトルに戻る
+            // ステージセレクトから始めた場合はタイトルに戻る
             string stageTransition;
             if (director.stageSelectFlag) stageTransition = "ReturnTitle";
             else                          stageTransition = "NextStage";

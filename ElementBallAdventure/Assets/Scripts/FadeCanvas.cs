@@ -14,7 +14,7 @@ public class FadeCanvas : MonoBehaviour
     [SerializeField]
     private Image panelImage;
 
-    float red, green, blue, alpha;
+    private float red, green, blue, alpha;
     
     void Start()
     {

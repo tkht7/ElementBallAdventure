@@ -5,11 +5,10 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public GameObject player; // 球のオブジェクト
-
+    public GameObject player;
     private GameObject mainCamera;
     private Quaternion startAngle;
-
+    // AorDのみ押した時の視点移動の速さ
     private const float cameraRotationSpeed = 60.0f;
     
     void Start()

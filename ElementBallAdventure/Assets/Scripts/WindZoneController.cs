@@ -5,10 +5,9 @@ using UnityEngine;
 public class WindZoneController : MonoBehaviour
 {
     private Vector3 startPos;
-    // -z方向以外にも打ち出されるときは変更できるようにする
-    private float windSpeed;
-    private float windPersistence;
-    private float windPower;
+    private const float windSpeed = -40.0f;
+    private const float windPersistence = 86.0f;
+    private const float windPower = 6000.0f;
 
     private AudioSource audioSource;
 
@@ -16,13 +15,11 @@ public class WindZoneController : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
         startPos = transform.position;
-        windSpeed = -40.0f;
-        windPersistence = 86.0f;
-        windPower = 6000.0f;
     }
     
     void Update()
     {
+        // 風のかたまりを一定のスピードで進ませる
         transform.Translate(0.0f, 0.0f, windSpeed * Time.deltaTime);
         // 一定距離進んだら消える
         if (startPos.z - transform.position.z > windPersistence)
@@ -41,6 +38,7 @@ public class WindZoneController : MonoBehaviour
 
     void OnTriggerStay(Collider collider)
     {
+        // プレイヤーに触れたら，プレイヤーに力を加える
         if (collider.gameObject.CompareTag("Player"))
         {
             var rb = collider.gameObject.GetComponent<Rigidbody>();

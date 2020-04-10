@@ -8,12 +8,13 @@ public class TitleSelectController : MonoBehaviour
     private Director director;
 
     private GameObject selectMenu;
-    private Button fromtheBeginningButton;
+    private Button newGameButton;
     private const int NewGame = 0;
 
     private GameObject stageSelectMenu;
     private Button stage1Button;
 
+    // タイトル画面の状態
     private int screenState;
     private const int title = 0;
     private const int menu = 1;
@@ -27,7 +28,7 @@ public class TitleSelectController : MonoBehaviour
         director = GameObject.Find("Director").GetComponent<Director>();
         selectMenu = transform.Find("SelectMenu").gameObject;
         stageSelectMenu = transform.Find("StageSelectMenu").gameObject;
-        fromtheBeginningButton = transform.Find("SelectMenu/FromtheBeginningButton").GetComponent<Button>();
+        newGameButton = transform.Find("SelectMenu/NewGameButton").GetComponent<Button>();
         stage1Button = transform.Find("StageSelectMenu/Stage1Button").GetComponent<Button>();
 
         audioSource = GetComponent<AudioSource>();
@@ -40,7 +41,7 @@ public class TitleSelectController : MonoBehaviour
             audioSource.PlayOneShot(decisionSound);
             selectMenu.SetActive(true);
             screenState = menu;
-            fromtheBeginningButton.Select();
+            newGameButton.Select();
         }
         else if (Input.GetKeyDown(KeyCode.X) && screenState == menu)
         {
@@ -52,7 +53,7 @@ public class TitleSelectController : MonoBehaviour
             stageSelectMenu.SetActive(false);
             selectMenu.SetActive(true);
             screenState = menu;
-            fromtheBeginningButton.Select();
+            newGameButton.Select();
         }
     }
 
@@ -76,7 +77,7 @@ public class TitleSelectController : MonoBehaviour
         }
     }
 
-    // StageSelect後のボタン押下時
+    // ステージ選択
     public void StageSelect(int stage)
     {
         audioSource.PlayOneShot(decisionSound);

@@ -18,12 +18,13 @@ public class Director : SingletonMonoBehaviour<Director>
     [SerializeField]
     private string[] stageName; //ステージ名
     [SerializeField]
-    private GameObject fadeCanvasPrefab;
+    private GameObject fadeCanvasPrefab; // シーン遷移するときに挟む黒い画面
     [SerializeField]
-    private GameObject gameOverCanvasPrefab;
+    private GameObject gameOverCanvasPrefab; // ゲームオーバー時に表示する画面
     [SerializeField]
     private float fadeWaitTime = 1.0f; //フェード時の待ち時間
 
+    // 効果音やBGMなど
     public AudioClip titleSound;
     public AudioClip decisionSound;
     public AudioClip gameOverSound;
@@ -42,19 +43,21 @@ public class Director : SingletonMonoBehaviour<Director>
     private Rigidbody playerRigidbody;
     private Button[] buttons;
     private EventTrigger[] eventTriggers;
+    private const int retry = 0;
+    private const int title = 1;
 
     public bool middleResumeFlag; // 中間地点に達しているかどうか
     public bool stageSelectFlag; // はじめから遊んでいるか，ステージセレクトで遊んでいるか
-    public bool transitionFlag; // 画面遷移を複数行わないように制御
+    public bool transitionFlag; // シーン遷移を複数行わないように制御
 
+    [System.NonSerialized]
+    public List<float> clearTime = new List<float> { 0.0f, 0.0f, 0.0f };
     private Text clearTimeText;
     private Text stage1ResultText;
     private Text stage2ResultText;
     private Text stage3ResultText;
     private Text endResultText;
-    [System.NonSerialized]
-    public List<float> clearTime = new List<float> { 0.0f, 0.0f, 0.0f };
-    public bool measureTimeFlag;
+    public bool measureTimeFlag; // これがtrueの時のみ時間を計測する
 
     public void Awake()
     {
@@ -78,13 +81,15 @@ public class Director : SingletonMonoBehaviour<Director>
         middlePoint = GameObject.Find("MiddlePoint");
         player = GameObject.FindGameObjectWithTag("Player").gameObject;
         playerRigidbody = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
+        clearTimeText = transform.Find("Canvas/Text").GetComponent<Text>();
         audioSource = GetComponents<AudioSource>();
-        audioSource[0].PlayOneShot(titleSound); // タイトル画面での音
         middleResumeFlag = false;
         transitionFlag = false;
         stageSelectFlag = false;
-        clearTimeText = transform.Find("Canvas/Text").GetComponent<Text>();
         measureTimeFlag = false;
+
+        // タイトル画面での音を鳴らす
+        audioSource[0].PlayOneShot(titleSound);
     }
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -95,11 +100,8 @@ public class Director : SingletonMonoBehaviour<Director>
         goal = GameObject.Find("Goal");
         player = GameObject.FindGameObjectWithTag("Player");
         playerRigidbody = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
-
         if (goal != null)
-        {
             goalDetector = goal.GetComponent<GoalDetector>();
-        }
 
         // 各シーンでの処理
         if (currentStageNum == startScene)
@@ -113,20 +115,24 @@ public class Director : SingletonMonoBehaviour<Director>
             stage2ResultText = GameObject.Find("Stage2ResultText").GetComponent<Text>();
             stage3ResultText = GameObject.Find("Stage3ResultText").GetComponent<Text>();
             endResultText = GameObject.Find("EndResultText").GetComponent<Text>();
+
+            // 各ステージのクリアタイムの合計を計算
             float totalTime = 0.0f;
             for (int i = 0; i < clearTime.Count; i++)
                 totalTime += clearTime[i];
+            // 各ステージと合計のタイムを表示
             stage1ResultText.text = "Stage1: " + timeShaping(clearTime[0]);
             stage2ResultText.text = "Stage2: " + timeShaping(clearTime[1]);
             stage3ResultText.text = "Stage3: " + timeShaping(clearTime[2]);
             endResultText.text = "TotalTime: " + timeShaping(totalTime);
+            // クリア時の効果音を流す
             for (int i = 0; i < gameClearSounds.Length; i++)
                 audioSource[0].PlayOneShot(gameClearSounds[i]);
         }
         else // startSceneとclearScene以外ではBGMを流す
         {
             audioSource[1].Play(); // BGM
-            measureTimeFlag = true;
+            measureTimeFlag = true; //このフラグがある時のみタイムを計測する
         }
     }
 
@@ -142,6 +148,7 @@ public class Director : SingletonMonoBehaviour<Director>
 
         if (goalDetector != null)
         {
+            // ゴールしたらBGMを止め，タイムも止める
             if (goalDetector.goalFlag)
             {
                 audioSource[1].Stop();
@@ -151,18 +158,23 @@ public class Director : SingletonMonoBehaviour<Director>
 
         if (measureTimeFlag)
         {
+            // 各ステージでのタイムを計測
             clearTime[currentStageNum - 1] += Time.deltaTime;
         }
+
         if (currentStageNum != startScene && currentStageNum != clearScene)
         {
+            // 現在のタイムを表示形式に合わせて変換
             clearTimeText.text = "Time: " + timeShaping(clearTime[currentStageNum - 1]);
         }
         else
         {
+            // スタート画面，クリア画面ではタイムは表示しない(左上に表示するタイムのこと)
             clearTimeText.text = "";
         }
     }
 
+    // 計測タイムを00:00:00(分:秒:小数部)の形式に変換
     public string timeShaping(float time)
     {
         return ((int)time / 60).ToString("00") + ":"             // 分
@@ -212,7 +224,7 @@ public class Director : SingletonMonoBehaviour<Director>
         }
         //フェードアウトさせる
         fadeCanvas.fadeOut = true;
-
+        // シーン遷移が終わったことを示す
         transitionFlag = false;
     }
 
@@ -221,23 +233,17 @@ public class Director : SingletonMonoBehaviour<Director>
     {
         // キャラの移動を停止させる
         playerRigidbody.isKinematic = true;
-
         //ゲームオーバー画面表示
         gameOverCanvasClone = Instantiate(gameOverCanvasPrefab);
-
         // 効果音
         audioSource[0].PlayOneShot(gameOverSound);
-
         // BGM停止
         audioSource[1].Stop();
-
-        // 画面遷移中フラグ
+        // シーン遷移中フラグ
         transitionFlag = true;
-
         //ボタンを取得
         buttons = gameOverCanvasClone.GetComponentsInChildren<Button>();
         buttons[0].Select();
-
         // イベントトリガーを取得
         eventTriggers = gameOverCanvasClone.GetComponentsInChildren<EventTrigger>();
 
@@ -255,7 +261,6 @@ public class Director : SingletonMonoBehaviour<Director>
         entry1.callback.AddListener((eventData) => NonSelectSelf());
         eventTriggers[0].triggers.Add(entry1);
 
-
         // 二つ目のボタンについても同様
         eventTriggers[1].triggers = new List<EventTrigger.Entry>();
         EventTrigger.Entry entry2;
@@ -270,13 +275,12 @@ public class Director : SingletonMonoBehaviour<Director>
         entry2.callback.AddListener((eventData) => NonSelectSelf());
         eventTriggers[1].triggers.Add(entry2);
 
-        // ボタンにイベント設定 AfterGameOverの引数により，その後の処理を変える
-        // 0:Retry, 1:title
-        buttons[0].onClick.AddListener(() => { AfterGameOver(0); });
-        buttons[1].onClick.AddListener(() => { AfterGameOver(1); });
+        // ボタンにイベント設定　AfterGameOverの引数により，その後の処理を変える
+        buttons[0].onClick.AddListener(() => { AfterGameOver(retry); });
+        buttons[1].onClick.AddListener(() => { AfterGameOver(title); });
     }
 
-        public void SelectSelf(Button button)
+    public void SelectSelf(Button button)
     {
         button.Select();
     }
@@ -286,12 +290,12 @@ public class Director : SingletonMonoBehaviour<Director>
         EventSystem.current.SetSelectedGameObject(null);
     }
 
-    // ゲームオーバーキャンバスを破棄し，押したボタンに応じた処理を行う
+    // ゲームオーバー画面を消し，押したボタンに応じた処理を行う
     public void AfterGameOver(int selectAction)
     {
         Destroy(gameOverCanvasClone);
-        if (selectAction == 0) Retry();
-        else if (selectAction == 1) ReturnTitle();
+        if (selectAction == retry) Retry();
+        else if (selectAction == title) ReturnTitle();
     }
 
     // リトライ
